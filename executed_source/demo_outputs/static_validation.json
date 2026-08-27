@@ -1,0 +1,35 @@
+[
+  {
+    "file": "V360_Machine_Health_Audit_Generator.html",
+    "script": 0,
+    "node_check": true,
+    "stderr": "",
+    "external_scripts": [],
+    "external_styles": [],
+    "remote_media": []
+  },
+  {
+    "file": "src/v360_machine_health_report_template.html",
+    "script": 0,
+    "node_check": true,
+    "stderr": "",
+    "external_scripts": [],
+    "external_styles": [],
+    "remote_media": []
+  },
+  {
+    "file": "demo_outputs/V360_Sample_Machine_Health_Report.html",
+    "script": 0,
+    "node_check": true,
+    "stderr": ""
+  },
+  {
+    "file": "demo_outputs/V360_Sample_Machine_Health_Report.html",
+    "script": 1,
+    "node_check": true,
+    "stderr": "",
+    "external_scripts": [],
+    "external_styles": [],
+    "remote_media": []
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "schema": "v360-direct-json-viewer/1.1",
+  "title": "Vision 360 Direct JSON Synchronized Compare",
+  "defaultQuality": 5,
+  "qualities": {
+    "4": {
+      "file": "4.json",
+      "label": "Fast",
+      "expectedFrames": 16
+    },
+    "5": {
+      "file": "5.json",
+      "label": "Smooth",
+      "expectedFrames": 32
+    },
+    "6": {
+      "file": "6.json",
+      "label": "Fine",
+      "expectedFrames": 64
+    }
+  },
+  "thumbnailFile": "sm.json",
+  "metadataFile": "0.json",
+  "stillFile": "still.jpg",
+  "playbackFps": 10,
+  "dragPixelsPerFrame": 8,
+  "actual": {
+    "label": "Machine capture \u00b7 D-1-11",
+    "basePath": "data/actual"
+  },
+  "reference": {
+    "label": "Reference demo \u00b7 D-1-11 tone-adjusted",
+    "basePath": "data/reference",
+    "notice": "Synthetic tone-adjusted copy of the same capture, used only to prove synchronized frame alignment."
+  }
+}

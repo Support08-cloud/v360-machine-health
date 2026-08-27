@@ -1,0 +1,47 @@
+{
+  "visionProfile": {
+    "currentProfile": {
+      "R": 205,
+      "G": 200,
+      "B": 222,
+      "OldRGB": [
+        245,
+        242,
+        249
+      ],
+      "NewRGB": [
+        255,
+        238,
+        255
+      ],
+      "sharpness": 3,
+      "contrast": 1,
+      "saturation": 0,
+      "colorTone": 0,
+      "AV": "8.0",
+      "TV": "1/60",
+      "ISO": 160,
+      "K": 5400,
+      "WB": "Color Temperature",
+      "pictureStyle": "Neutral",
+      "quality": "L",
+      "width": 1920,
+      "height": 1080,
+      "tolerance": 5,
+      "cameraAppVersion": "4.2.0",
+      "machineName": "Machine 02",
+      "stoneType": "Cushion",
+      "isFreeze": false,
+      "lightName": "V360 Master Light"
+    }
+  },
+  "TotalTime": "00:01:00",
+  "ImageQuality": "Fine",
+  "Gamma": 1.0,
+  "MinInputLevel": 0,
+  "MaxInputLevel": 255,
+  "MinOutputLevel": 0,
+  "MaxOutputLevel": 255,
+  "Camera": "Canon EOS R8",
+  "MachineName": "Machine 02"
+}

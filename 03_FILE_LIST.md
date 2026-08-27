@@ -1,0 +1,243 @@
+# File List
+
+- `00_README_FIRST_WINDOWS.md`
+- `01_IMPLEMENTATION_STATUS.md`
+- `02_VIEWER_INTEGRATION_HANDOFF.md`
+- `START_WINDOWS_PACKAGE.bat`
+- `executed_source/IMPLEMENTATION_CHANGELOG.md`
+- `executed_source/README_EXECUTED.md`
+- `executed_source/SHA256SUMS.txt`
+- `executed_source/V360_Machine_Health_Audit_Generator.html`
+- `executed_source/VALIDATION_REPORT.md`
+- `executed_source/VERSION.txt`
+- `executed_source/demo_outputs/V360_Sample_Machine_Health_Report.html`
+- `executed_source/demo_outputs/generator_audit_data.json`
+- `executed_source/demo_outputs/generator_partial_completed.png`
+- `executed_source/demo_outputs/generator_strict_completed.png`
+- `executed_source/demo_outputs/manifest.json`
+- `executed_source/demo_outputs/report_exported_audit_data.json`
+- `executed_source/demo_outputs/sample_report_machine_02.png`
+- `executed_source/demo_outputs/static_validation.json`
+- `executed_source/demo_outputs/validation_results.json`
+- `executed_source/sample_capture_data/README_SAMPLE_DATA.md`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-01/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-01/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-01/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-02/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-02/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-02/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-03/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-03/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-03/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-04/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-04/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-1-04/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-01/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-01/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-01/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-02/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-02/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-02/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-03/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-03/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-03/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-04/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-04/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-2-04/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-01/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-01/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-01/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-02/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-02/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-02/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-03/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-03/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-03/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-04/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-04/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-3-04/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-01/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-01/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-01/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-02/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-02/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-02/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-03/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-03/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-03/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-04/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-04/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-4-04/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-01/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-01/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-01/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-02/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-02/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-02/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-03/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-03/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-03/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-04/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-04/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-5-04/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-01/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-01/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-01/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-02/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-02/still.jpg`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-02/video.mp4`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-03/0.json`
+- `executed_source/sample_capture_data/flat/Customer_Captures/D-6-03/video.mp4`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-1/0.json`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-1/still.jpg`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-1/video.mp4`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-2/0.json`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-2/still.jpg`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-2/video.mp4`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-3/0.json`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-3/still.jpg`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-3/video.mp4`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-4/0.json`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-4/still.jpg`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-4/video.mp4`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-5/0.json`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-5/still.jpg`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-5/video.mp4`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-6/0.json`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-6/still.jpg`
+- `executed_source/sample_capture_data/flat/Ideal_Reference/D-6/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-1/0.json`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-1/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-1/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-2/0.json`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-2/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-2/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-3/0.json`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-3/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-3/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-4/0.json`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-4/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-4/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-5/0.json`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-5/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-5/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-6/0.json`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-6/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_EDF_Reference/D-6/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-1/0.json`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-1/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-1/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-2/0.json`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-2/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-2/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-3/0.json`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-3/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-3/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-4/0.json`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-4/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-4/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-5/0.json`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-5/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-5/video.mp4`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-6/0.json`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-6/still.jpg`
+- `executed_source/sample_capture_data/flat/V50_Reference/D-6/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-1/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-1/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-1/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-2/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-2/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-2/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-3/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-3/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-3/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-4/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-4/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-4/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-5/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-5/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-5/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-6/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-6/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Alpha/D-6/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-1/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-1/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-1/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-2/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-2/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-2/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-3/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-3/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-3/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-4/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-4/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-4/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-5/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-5/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-5/video.mp4`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-6/0.json`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-6/still.jpg`
+- `executed_source/sample_capture_data/nested/Customer_Nested/Machine Beta/D-6/video.mp4`
+- `executed_source/src/00_README.md`
+- `executed_source/src/01_architecture.md`
+- `executed_source/src/02_input_tool_spec.md`
+- `executed_source/src/03_output_report_spec.md`
+- `executed_source/src/04_data_model_and_capture_schema.md`
+- `executed_source/src/05_scoring_algorithm_spec.md`
+- `executed_source/src/06_brand_guideline_reference.md`
+- `executed_source/src/07_localization_spec.md`
+- `executed_source/src/08_current_state_and_next_steps.md`
+- `executed_source/src/09_file_manifest.md`
+- `executed_source/src/build_generator.py`
+- `executed_source/src/build_report_template.py`
+- `executed_source/src/generator_extra.css`
+- `executed_source/src/generator_runtime.js`
+- `executed_source/src/report_extra.css`
+- `executed_source/src/report_overrides.js`
+- `executed_source/src/v360_machine_health_report_template.html`
+- `executed_source/src/v360_machine_health_report_template_base.html`
+- `executed_source/src/v360_report_generator_base.html`
+- `executed_source/tests/e2e_validate.py`
+- `handoff_markdown/00_README.md`
+- `handoff_markdown/01_architecture.md`
+- `handoff_markdown/02_input_tool_spec.md`
+- `handoff_markdown/03_output_report_spec.md`
+- `handoff_markdown/04_data_model_and_capture_schema.md`
+- `handoff_markdown/05_scoring_algorithm_spec.md`
+- `handoff_markdown/06_brand_guideline_reference.md`
+- `handoff_markdown/07_localization_spec.md`
+- `handoff_markdown/08_current_state_and_next_steps.md`
+- `handoff_markdown/09_file_manifest.md`
+- `handoff_markdown/reference_implementation/v360_machine_health_demo.html`
+- `handoff_markdown/reference_implementation/v360_report_generator.html`
+- `integrated_direct_json_viewer/README.md`
+- `integrated_direct_json_viewer/START_VIEWER_MAC.command`
+- `integrated_direct_json_viewer/START_VIEWER_WINDOWS.bat`
+- `integrated_direct_json_viewer/TESTED_BROWSER_VIEW.png`
+- `integrated_direct_json_viewer/TESTED_BROWSER_VIEW_RECHECK.png`
+- `integrated_direct_json_viewer/TEST_RESULTS.md`
+- `integrated_direct_json_viewer/assets/v360-core.js`
+- `integrated_direct_json_viewer/assets/viewer-app.js`
+- `integrated_direct_json_viewer/assets/viewer.css`
+- `integrated_direct_json_viewer/data/actual/0.json`
+- `integrated_direct_json_viewer/data/actual/4.json`
+- `integrated_direct_json_viewer/data/actual/5.json`
+- `integrated_direct_json_viewer/data/actual/6.json`
+- `integrated_direct_json_viewer/data/actual/sm.json`
+- `integrated_direct_json_viewer/data/actual/still.jpg`
+- `integrated_direct_json_viewer/data/reference/0.json`
+- `integrated_direct_json_viewer/data/reference/4.json`
+- `integrated_direct_json_viewer/data/reference/5.json`
+- `integrated_direct_json_viewer/data/reference/6.json`
+- `integrated_direct_json_viewer/data/reference/sm.json`
+- `integrated_direct_json_viewer/data/reference/still.jpg`
+- `integrated_direct_json_viewer/report.html`
+- `integrated_direct_json_viewer/server.py`
+- `integrated_direct_json_viewer/tests/browser_interaction_test.py`
+- `integrated_direct_json_viewer/tests/test_core.js`
+- `integrated_direct_json_viewer/tests/validate_package.py`
+- `integrated_direct_json_viewer/viewer-config.json`
+- `machine_health_generator/OPEN_GENERATOR_WINDOWS.bat`
+- `machine_health_generator/V360_Machine_Health_Audit_Generator_v1.0.0.html`
+- `machine_health_validation_report.md`
+- `sample_machine_health_report.html`

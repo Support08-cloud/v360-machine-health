@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-report-theme="modern">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Health Audit — V360</title>
+<style>
+:root, [data-theme="light"] {
+  --bg-page: #FEFEFE;
+  --bg-card: #FFFFFF;
+  --bg-band: #EBECEC;
+  --text-primary: #2B2A29;
+  --text-secondary: #4A4A48;
+  --text-muted: #7A7A79;
+  --accent: #C6691D;
+  --accent-hover: #8E4A12;
+  --accent-tint: #FBEEDF;
+  --border: #C8C9C9;
+  --success: #2E7D32;
+  --success-tint: #E7F1E8;
+  --warning: #E0A800;
+  --warning-tint: #FBF2DA;
+  --danger: #C62828;
+  --danger-tint: #FAE6E6;
+  --shadow: 0 1px 3px rgba(43,42,41,.08), 0 1px 2px rgba(43,42,41,.06);
+}
+[data-theme="dark"] {
+  --bg-page: #1B1A19;
+  --bg-card: #2B2A29;
+  --bg-band: #34434D;
+  --text-primary: #FEFEFE;
+  --text-secondary: #C8C9C9;
+  --text-muted: #918F89;
+  --accent: #C6691D;
+  --accent-hover: #EFB97A;
+  --accent-tint: #3B2A1B;
+  --border: #454440;
+  --success: #5CB860;
+  --success-tint: #1E3120;
+  --warning: #FFC947;
+  --warning-tint: #392E14;
+  --danger: #EF5350;
+  --danger-tint: #3A1E1E;
+  --shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+
+/* ---- report style: instrument readout ---- */
+[data-report-theme="instrument"] {
+  --bg-page: #171513; --bg-card: #171513; --bg-band: #221F1B;
+  --text-primary: #F5F3EE; --text-secondary: #B8B6AE; --text-muted: #8A8880;
+  --accent: #C6691D; --accent-hover: #E08A3E; --accent-tint: #2A2119;
+  --border: #3A3834;
+  --success: #5CB860; --success-tint: #16241A;
+  --warning: #FFC947; --warning-tint: #2E2612;
+  --danger: #EF5350; --danger-tint: #301818;
+  --shadow: none;
+  --card-radius: 0px; --pill-radius: 3px;
+}
+[data-report-theme="instrument"] body,
+[data-report-theme="instrument"] .mono { font-family: 'JetBrains Mono', monospace; }
+[data-report-theme="instrument"] { background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0px, rgba(255,255,255,.03) 1px, transparent 1px, transparent 26px); }
+[data-report-theme="instrument"] .m-id, [data-report-theme="instrument"] .m-metric,
+[data-report-theme="instrument"] h1, [data-report-theme="instrument"] .title-block .sub,
+[data-report-theme="instrument"] .cm-label { letter-spacing: .04em; text-transform: uppercase; }
+[data-report-theme="instrument"] .facet { display: none; }
+[data-report-theme="instrument"] .m-card::before,
+[data-report-theme="instrument"] .m-card::after {
+  content: ''; position: absolute; width: 11px; height: 11px; border-style: solid; border-color: var(--status);
+}
+[data-report-theme="instrument"] .m-card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+[data-report-theme="instrument"] .m-card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+[data-report-theme="instrument"] .badge.badge-danger { animation: ledPulse 1.4s ease-in-out infinite; }
+@keyframes ledPulse { 0%,100%{ opacity:1 } 50%{ opacity:.45 } }
+
+/* ---- report style: cut & facet ---- */
+[data-report-theme="facet"] {
+  --bg-page: #FFF6E0; --bg-card: #FEFEFE; --bg-band: #F5EBD3;
+  --text-primary: #2B2A29; --text-secondary: #8A7A5E; --text-muted: #A8946E;
+  --accent: #C6691D; --accent-hover: #8E4A12; --accent-tint: #F5EBD3;
+  --border: #EFE3C8;
+  --success: #2E7D32; --success-tint: #E7F1E8;
+  --warning: #E0A800; --warning-tint: #FBF2DA;
+  --danger: #C62828; --danger-tint: #FAE6E6;
+  --shadow: 0 1px 3px rgba(43,42,41,.06);
+  --card-radius: 0px; --pill-radius: 20px;
+}
+[data-report-theme="facet"] .m-card {
+  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+}
+[data-report-theme="facet"] .facet { display: none; }
+[data-report-theme="facet"] .m-card { box-shadow: inset 4px 0 0 var(--status); }
+[data-report-theme="facet"] .m-score { display: none; }
+[data-report-theme="facet"] .m-score-badge-wrap { display: flex !important; }
+
+/* ---- report style: spec sheet ---- */
+[data-report-theme="specsheet"] {
+  --bg-page: #FEFEFE; --bg-card: #FEFEFE; --bg-band: #F1EFE8;
+  --text-primary: #2B2A29; --text-secondary: #4A4A48; --text-muted: #7A7A79;
+  --accent: #C6691D; --accent-hover: #8E4A12; --accent-tint: #FBEEDF;
+  --border: #C8C9C9;
+  --success: #2E7D32; --success-tint: #E7F1E8;
+  --warning: #E0A800; --warning-tint: #FBF2DA;
+  --danger: #C62828; --danger-tint: #FAE6E6;
+  --shadow: none;
+  --card-radius: 0px; --pill-radius: 3px;
+}
+[data-report-theme="specsheet"] .m-card { border: none; border-bottom: 2px solid var(--status); box-shadow: none; }
+[data-report-theme="specsheet"] .facet { display: none; }
+[data-report-theme="specsheet"] .ref-code { display: block !important; }
+[data-report-theme="specsheet"] .mono, [data-report-theme="specsheet"] .m-id { font-family: 'JetBrains Mono', monospace; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, 'Segoe UI', Arial, sans-serif;
+  transition: background .25s ease, color .25s ease;
+  padding: 0 0 3rem;
+}
+.mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font-family: inherit; cursor: pointer; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 1.5rem; }
+
+.topbar {
+  display: flex; align-items: center; gap: 1.25rem;
+  padding: 1.25rem 1.5rem; border-bottom: .5px solid var(--border);
+  max-width: 980px; margin: 0 auto; flex-wrap: wrap;
+}
+.logo-slot { position: relative; width: 108px; height: 50px; }
+.logo { position: absolute; top: 0; left: 0; width: 108px; height: auto; transition: opacity .25s ease; }
+.logo-dark { opacity: 0; }
+[data-theme="dark"] .logo-dark { opacity: 1; }
+[data-theme="dark"] .logo-light { opacity: 0; }
+.title-block { flex: 1; min-width: 220px; }
+.title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.title-block h1 {
+  font-size: 30px; font-weight: 700; letter-spacing: -0.02em;
+  line-height: 1.15; margin: 0;
+}
+@media (max-width: 640px) {
+  .title-block h1 { font-size: 23px; }
+}
+.demo-tag {
+  font-size: 11px; color: var(--text-muted); border: .5px solid var(--border);
+  border-radius: 20px; padding: 2px 10px; letter-spacing: .02em;
+}
+.title-block .sub { font-size: 13px; color: var(--text-secondary); margin: 6px 0 0; }
+.theme-toggle {
+  background: transparent; border: .5px solid var(--border); border-radius: 20px;
+  padding: 7px 14px; font-size: 12px; color: var(--text-secondary);
+  transition: background .2s ease;
+}
+.theme-toggle:hover { background: var(--bg-band); }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.lang-toggle {
+  background: transparent; border: .5px solid var(--border); border-radius: 20px;
+  padding: 7px 14px; font-size: 12px; color: var(--text-secondary); font-family: inherit;
+}
+.lang-toggle:hover { background: var(--bg-band); }
+.settings-toggle {
+  background: transparent; border: .5px dashed var(--border); border-radius: 20px;
+  padding: 7px 14px; font-size: 12px; color: var(--text-secondary);
+  display: flex; align-items: center; gap: 6px;
+}
+.settings-toggle:hover { background: var(--bg-band); }
+.settings-toggle .tag {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .04em;
+  background: var(--bg-band); color: var(--text-muted); border-radius: 4px; padding: 1px 5px;
+}
+.settings-panel {
+  max-width: 980px; margin: 0 auto; padding: 0 1.5rem;
+  overflow: hidden; max-height: 0; transition: max-height .35s ease;
+}
+.settings-panel.open { max-height: 600px; }
+.settings-panel-inner {
+  background: var(--bg-band); border: .5px dashed var(--border); border-radius: 12px;
+  padding: 1.25rem 1.5rem; margin: 1rem 0; transition: background-color .25s ease, border-color .25s ease;
+}
+.settings-title { font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+.settings-sub { font-size: 12px; color: var(--text-secondary); margin: 0 0 1rem; line-height: 1.5; }
+.settings-row { margin-bottom: 12px; }
+.settings-row label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.settings-row input[type="range"] { width: 100%; accent-color: var(--accent); }
+.settings-hint { font-size: 11px; color: var(--text-muted); margin: 4px 0 14px; }
+.settings-row-split { display: flex; gap: 16px; margin-bottom: 14px; }
+.settings-row-split > div { flex: 1; }
+.settings-row-split label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.settings-row-split input[type="number"] {
+  width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  background: var(--bg-card); border: .5px solid var(--border); border-radius: 6px; padding: 6px 8px; color: var(--text-primary);
+}
+.settings-reset {
+  background: transparent; border: .5px solid var(--border); border-radius: 8px;
+  padding: 6px 12px; font-size: 12px; color: var(--text-secondary);
+}
+.settings-reset:hover { background: var(--bg-card); }
+
+@keyframes viewIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.view-enter { animation: viewIn .4s ease; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.m-card { animation: cardIn .4s ease backwards; }
+
+.score-control {
+  display: flex; gap: 6px; flex-wrap: wrap; margin: 1.75rem 0 .5rem;
+}
+.metric-pill {
+  background: transparent; border: .5px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; font-size: 13px; color: var(--text-secondary);
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.metric-pill.active { background: var(--text-primary); color: var(--bg-page); border-color: var(--text-primary); }
+.hint { font-size: 12px; color: var(--text-muted); margin: .25rem 0 1.25rem; }
+
+.picker-intro { padding-top: .5rem; }
+.picker-intro h2 { font-size: 20px; font-weight: 700; margin: 0 0 6px; }
+.picker-intro p { font-size: 13px; color: var(--text-secondary); margin: 0 0 1.5rem; max-width: 580px; line-height: 1.6; }
+.audience-label, .picker-subhead { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 0 0 8px; }
+.picker-subhead { margin-top: 1.75rem; }
+.picker-subhead-note { text-transform: none; letter-spacing: 0; font-size: 11px; }
+.visibility-options { display: flex; flex-direction: column; gap: 9px; }
+.vis-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary); cursor: pointer; }
+.vis-check input { accent-color: var(--accent); width: 15px; height: 15px; flex: none; }
+.save-row { display: flex; align-items: center; gap: 12px; margin-top: 1.1rem; }
+.save-settings-btn {
+  background: var(--accent); color: #FEFEFE; border: none; border-radius: 8px;
+  padding: 10px 20px; font-size: 13px; font-weight: 600; font-family: inherit;
+}
+.save-settings-btn:hover { background: var(--accent-hover); }
+.save-status { font-size: 12px; color: var(--text-muted); opacity: 0; transition: opacity .25s ease; }
+.save-status.show { opacity: 1; }
+.save-status.ok { color: var(--success); }
+.save-status.fail { color: var(--danger); }
+.audience-options { display: flex; gap: 6px; margin-bottom: .5rem; }
+.audience-btn {
+  position: relative; background: transparent; border: .5px solid var(--border); border-radius: 8px;
+  padding: 8px 16px; font-size: 13px; color: var(--text-secondary); font-family: inherit;
+}
+.audience-btn.active { background: var(--text-primary); color: var(--bg-page); border-color: var(--text-primary); }
+.audience-btn.current::after {
+  content: 'current'; position: absolute; top: -9px; right: -4px;
+  font-size: 9px; text-transform: uppercase; letter-spacing: .03em;
+  background: var(--accent); color: #FEFEFE; padding: 1px 6px; border-radius: 8px;
+}
+.picker-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; margin-bottom: 2.25rem; align-items: stretch; }
+.picker-option { display: flex; flex-direction: column; gap: 10px; position: relative; }
+.picker-option.current::before {
+  content: 'current'; position: absolute; top: -8px; right: 6px; z-index: 1;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .04em;
+  background: var(--accent); color: #FEFEFE; padding: 2px 8px; border-radius: 10px;
+}
+.picker-preview { padding: 16px; border-radius: 12px; background: var(--bg-band); flex: 1; display: flex; align-items: center; justify-content: center; min-height: 168px; }
+.picker-preview .m-card { pointer-events: none; width: 100%; }
+.picker-name { font-size: 13px; font-weight: 500; margin: 0; color: var(--text-primary); }
+.picker-btn {
+  background: transparent; border: .5px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; font-size: 12px; color: var(--text-secondary); font-family: inherit;
+}
+.picker-btn:hover { background: var(--bg-band); border-color: var(--accent); color: var(--accent); }
+.change-style-btn {
+  background: transparent; border: .5px solid var(--border); border-radius: 20px;
+  padding: 7px 14px; font-size: 12px; color: var(--text-secondary); font-family: inherit;
+}
+.change-style-btn:hover { background: var(--bg-band); }
+
+#summarySection {
+  margin: 1.75rem 0 2rem; padding: 1.5rem 1.75rem;
+  background: var(--bg-card); border: .5px solid var(--border); border-radius: 12px;
+  transition: background-color .25s ease, border-color .25s ease;
+}
+.summary-grid { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.summary-avg { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.summary-num { font-size: 44px; font-weight: 600; line-height: 1; }
+.summary-unit { font-size: 14px; color: var(--text-secondary); }
+.summary-metric-label { flex-basis: 100%; font-size: 12px; color: var(--text-muted); margin: 4px 0 0; }
+.delta { font-size: 12px; font-weight: 500; margin-left: 6px; }
+.delta-ok { color: var(--success); }
+.delta-warn { color: var(--warning); }
+.delta-bad { color: var(--danger); }
+.summary-dist { display: flex; gap: 18px; flex-wrap: wrap; }
+.dist-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+.dist-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.rank-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+.rank-row { display: grid; grid-template-columns: 90px 1fr 34px 58px; align-items: center; gap: 10px; cursor: pointer; padding: 5px 6px; border-radius: 6px; margin: 0 -6px; }
+.rank-row .delta { text-align: right; margin-left: 0; }
+.rank-row:hover { background: var(--bg-band); }
+.rank-id { font-size: 12px; color: var(--text-secondary); }
+.rank-track { position: relative; height: 8px; background: var(--bg-band); border-radius: 4px; }
+.rank-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px; transition: width .35s ease, background-color .3s ease; }
+.rank-avg-line { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text-primary); opacity: .5; }
+.rank-score { font-size: 12px; text-align: right; }
+.conclusion { border-top: .5px solid var(--border); padding-top: 1.1rem; }
+.conclusion-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 0 0 6px; }
+.conclusion-text { font-size: 14px; line-height: 1.65; color: var(--text-primary); margin: 0; }
+
+.fleet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.m-card {
+  position: relative; overflow: hidden;
+  background: var(--bg-card); border: .5px solid var(--border); border-radius: var(--card-radius, 12px);
+  padding: 16px 18px; box-shadow: var(--shadow); cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-radius .25s ease;
+}
+.m-card:hover { transform: translateY(-2px); }
+.facet {
+  position: absolute; top: 0; left: 0; width: 0; height: 0;
+  border-style: solid; border-width: 22px 22px 0 0;
+  border-color: var(--status) transparent transparent transparent;
+}
+.ref-code { display: none; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); margin: 4px 0 8px; }
+.m-id { font-size: 13px; color: var(--text-secondary); margin: 4px 0 10px; }
+.badge {
+  display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: var(--pill-radius, 20px);
+  font-weight: 500; transition: background-color .3s ease, color .3s ease, border-radius .25s ease;
+}
+.badge-success { background: var(--success-tint); color: var(--success); }
+.badge-warning { background: var(--warning-tint); color: var(--warning); }
+.badge-danger { background: var(--danger-tint); color: var(--danger); }
+.m-score { font-size: 34px; font-weight: 600; margin: 14px 0 0; line-height: 1; }
+.m-score .unit { font-size: 14px; font-weight: 400; color: var(--text-muted); margin-left: 3px; }
+.m-score-badge-wrap {
+  display: none; width: 60px; height: 60px; margin: 16px 0 2px; flex: none;
+  background: var(--bg-band); transform: rotate(45deg); align-items: center; justify-content: center;
+}
+.m-score-badge-wrap span { transform: rotate(-45deg); font-size: 18px; font-weight: 700; }
+.m-metric { font-size: 12px; color: var(--text-muted); margin: 4px 0 12px; }
+.mini-stones { display: flex; gap: 4px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; }
+
+#detailView[hidden], #fleetView[hidden], #summarySection[hidden], #stylePicker[hidden] { display: none; }
+.back-btn {
+  background: transparent; border: none; color: var(--text-secondary);
+  font-size: 13px; padding: 0; margin: 1.5rem 0 1rem;
+}
+.back-btn:hover { color: var(--accent); }
+.detail-header {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.diagnosis-box {
+  background: var(--bg-band); border-radius: var(--card-radius, 12px); padding: 14px 18px; margin-bottom: 1.5rem;
+}
+.diagnosis-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 0 0 6px; }
+.diagnosis-text { font-size: 13px; line-height: 1.6; color: var(--text-primary); margin: 0; }
+.diagnosis-fix { font-size: 13px; line-height: 1.6; margin: 10px 0 0; padding-top: 10px; border-top: .5px dashed var(--border); }
+.fix-label { font-weight: 600; color: var(--text-primary); }
+.fix-action { color: var(--text-primary); }
+.fix-clean { color: var(--success); }
+
+.metadata-toggle {
+  background: transparent; border: .5px solid var(--border); border-radius: 8px;
+  padding: 8px 14px; font-size: 12px; color: var(--text-secondary); font-family: inherit; margin-top: 14px;
+}
+.metadata-toggle:hover { background: var(--bg-band); }
+.metadata-panel { margin-bottom: 1.75rem; padding: 16px 18px; background: var(--bg-band); border-radius: var(--card-radius, 12px); }
+.meta-section-title { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 16px 0 6px; }
+.meta-section-title:first-child { margin-top: 0; }
+.meta-table { display: grid; grid-template-columns: 150px 1fr 1fr; gap: 3px 14px; font-size: 12px; }
+.meta-head { font-size: 10px; text-transform: uppercase; color: var(--text-muted); padding-bottom: 4px; border-bottom: .5px solid var(--border); }
+.meta-field { color: var(--text-secondary); padding: 5px 0; }
+.meta-val { color: var(--text-primary); padding: 5px 0; }
+.meta-mismatch.meta-val { color: var(--danger); font-weight: 500; }
+.meta-mismatch.meta-field { color: var(--danger); }
+.meta-mismatch.meta-field::before { content: '\u25CF '; font-size: 8px; position: relative; top: -2px; }
+@media (max-width: 640px) {
+  .meta-table { grid-template-columns: 1fr 1fr 1fr; font-size: 11px; }
+}
+.detail-header h2 { font-size: 20px; margin: 0; }
+.view-control { display: flex; gap: 6px; margin: 1rem 0 1.5rem; }
+.view-pill {
+  background: transparent; border: .5px solid var(--border); border-radius: 8px;
+  padding: 6px 12px; font-size: 12px; color: var(--text-secondary);
+  transition: background .2s ease, color .2s ease;
+}
+.view-pill.active { background: var(--accent); color: #FEFEFE; border-color: var(--accent); }
+
+.stone-row { padding: 20px 0; border-top: .5px solid var(--border); }
+.stone-row:first-child { border-top: none; }
+.stone-row-head { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.stone-id { display: flex; flex-direction: column; gap: 2px; min-width: 96px; }
+.stone-id .shape { font-size: 12px; color: var(--text-muted); }
+.stone-score { font-size: 20px; font-weight: 600; }
+.compare { display: flex; gap: 8px; margin-bottom: 14px; }
+.chip {
+  flex: 1; background: var(--bg-band); border-radius: var(--card-radius, 8px); padding: 14px 0;
+  text-align: center; font-size: 11px; color: var(--text-secondary);
+  transition: padding .25s ease;
+}
+.compare.full .chip { padding: 34px 0; }
+.chip-ideal { background: var(--success-tint); color: var(--success); }
+
+.color-table { display: grid; grid-template-columns: 82px repeat(3, 1fr); gap: 3px 14px; margin-bottom: 14px; font-size: 12px; }
+.ct-head { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); padding-bottom: 5px; border-bottom: .5px solid var(--border); }
+.ct-rowlabel { font-size: 11px; color: var(--text-secondary); padding-top: 9px; }
+.ct-cell { padding-top: 9px; color: var(--text-primary); line-height: 1.55; }
+.ct-hsl { display: block; color: var(--text-muted); font-size: 11px; }
+.ct-diff { font-weight: 500; }
+.ct-diff.ok { color: var(--success); }
+.ct-diff.warn { color: var(--warning); }
+.ct-diff.bad { color: var(--danger); }
+.ct-section { padding-top: 15px; margin-top: 6px; border-top: .5px solid var(--border); }
+.color-note { font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 14px; }
+
+.upgrade-band {
+  display: flex; align-items: center; gap: 8px;
+  padding-top: 12px; border-top: .5px dashed var(--border);
+}
+.upgrade-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.chip-up { flex: 1; background: var(--accent-tint); color: var(--accent-hover); border-radius: var(--card-radius, 8px); padding: 10px 0; text-align: center; font-size: 11px; }
+[data-audience="engineer"][data-upgrade-band="shown"] .upgrade-band { opacity: .55; transform: scale(.96); transform-origin: left center; }
+[data-audience="engineer"][data-upgrade-band="shown"] .upgrade-band:hover { opacity: 1; transform: scale(1); transition: opacity .2s ease, transform .2s ease; }
+
+footer { max-width: 980px; margin: 2.5rem auto 0; padding: 1.25rem 1.5rem 0; border-top: .5px solid var(--border); font-size: 12px; color: var(--text-muted); }
+footer p { margin: 0 0 6px; }
+footer a { color: var(--text-secondary); text-decoration: none; border-bottom: .5px solid var(--border); }
+footer a:hover { color: var(--accent); border-color: var(--accent); }
+
+@media (max-width: 640px) {
+  .color-table { grid-template-columns: 1fr 1fr; }
+  .color-table .ct-head:first-child, .color-table .ct-rowlabel { display: none; }
+  .upgrade-band { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .001ms !important; animation-duration: .001ms !important; }
+}
+/* Real-data report additions */
+:root, [data-theme="light"] {
+  --unknown: #6B7280;
+  --unknown-tint: #EEF0F2;
+}
+[data-theme="dark"], [data-report-theme="instrument"] {
+  --unknown: #A9ADB4;
+  --unknown-tint: #30343A;
+}
+.badge-unknown { background: var(--unknown-tint); color: var(--unknown); }
+.delta-neutral { color: var(--text-muted); }
+.data-quality-line { margin: 8px 0 0; font-size: 11px; color: var(--text-muted); }
+.coverage-chip {
+  display: inline-flex; align-items: center; gap: 5px; margin-left: 6px;
+  border: .5px solid var(--border); border-radius: 999px; padding: 2px 7px;
+  font-size: 10px; color: var(--text-secondary); vertical-align: middle;
+}
+.coverage-chip.partial { color: var(--warning); border-color: var(--warning); }
+.compare.real-media {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch;
+  background: transparent; border: none; padding: 0; min-height: 0;
+}
+.media-card {
+  min-width: 0; border: .5px solid var(--border); border-radius: 10px;
+  overflow: hidden; background: var(--bg-band); position: relative;
+}
+.media-card img, .media-card video {
+  display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain;
+  background: #111;
+}
+.media-caption {
+  display: flex; justify-content: space-between; gap: 8px; align-items: center;
+  padding: 7px 9px; font-size: 11px; color: var(--text-secondary); background: var(--bg-card);
+}
+.media-filename { max-width: 58%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); }
+.media-missing {
+  min-height: 170px; display: grid; place-items: center; padding: 18px;
+  text-align: center; color: var(--text-muted); font-size: 12px;
+}
+.compare.full .media-card img, .compare.full .media-card video { aspect-ratio: 16 / 10; }
+.upgrade-band.real-upgrades { align-items: stretch; flex-wrap: wrap; }
+.upgrade-preview {
+  display: grid; grid-template-columns: 74px 1fr; gap: 9px; align-items: center;
+  min-width: 210px; flex: 1; border: .5px solid var(--border); border-radius: 8px;
+  padding: 7px; background: var(--bg-card);
+}
+.upgrade-preview img { width: 74px; height: 58px; object-fit: contain; background: #111; border-radius: 5px; }
+.upgrade-preview .upgrade-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+.upgrade-preview .upgrade-meta { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+.stone-unavailable {
+  padding: 16px; border: .5px dashed var(--border); border-radius: 8px;
+  color: var(--text-muted); font-size: 12px; background: var(--bg-band);
+}
+.capture-source {
+  margin: 9px 0 0; font-size: 10px; color: var(--text-muted); word-break: break-all;
+}
+.report-disclosure {
+  margin-top: 8px; padding: 9px 11px; background: var(--bg-band); border-radius: 7px;
+  font-size: 10px; line-height: 1.55; color: var(--text-muted);
+}
+.header-action-secondary {
+  background: transparent; border: .5px solid var(--border); border-radius: 20px;
+  padding: 7px 12px; font-size: 12px; color: var(--text-secondary);
+}
+.header-action-secondary:hover { background: var(--bg-band); }
+.empty-report {
+  border: .5px dashed var(--border); border-radius: 12px; padding: 28px;
+  color: var(--text-secondary); text-align: center; background: var(--bg-band);
+}
+.metric-na { font-size: 30px !important; letter-spacing: -.02em; }
+@media (max-width: 680px) {
+  .compare.real-media { grid-template-columns: 1fr; }
+  .header-actions { width: 100%; }
+  .upgrade-preview { min-width: 100%; }
+}
+@media print {
+  body { padding-bottom: 0; }
+  .header-actions, .settings-panel, #stylePicker, #metricControl, .hint, .back-btn,
+  .view-control, .stone-metadata-toggle, .save-row { display: none !important; }
+  .topbar { max-width: none; padding-left: 0; padding-right: 0; }
+  .wrap { max-width: none; padding: 0; }
+  #summarySection, #fleetView, #detailView { break-inside: avoid; }
+  .m-card, .stone-row, .summary-grid, .rank-list, .conclusion { box-shadow: none !important; }
+  .metadata-panel[hidden] { display: block !important; }
+  a { color: inherit !important; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo-slot"><svg id="lg-light" class="logo logo-light" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 790.01 368.11"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    #lg-light .fil5 {fill:none}
+    #lg-light .fil4 {fill:#434242}
+    #lg-light .fil0 {fill:#C5691D}
+    #lg-light .fil3 {fill:#434242;fill-rule:nonzero}
+    #lg-light .fil1 {fill:#2B2A29;fill-rule:nonzero}
+    #lg-light .fil2 {fill:#C5691D;fill-rule:nonzero}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <g id="_2777914604144">
+   <g>
+    <path class="fil0" d="M146.23 48.01c-7.27,2.32 -13.71,5.51 -19.11,9.36 -0.55,0.4 -1.06,0.78 -1.61,1.2l11.68 9.58c5.2,-4.25 10.99,-7.51 17.36,-9.88l-8.32 -10.26zm34.23 -4c7.82,0.46 16.03,1.82 24.38,4.2l0.86 8.77c-7.3,-1.91 -14.49,-2.98 -21.57,-3.21l-3.67 -9.76zm30.24 6.02c7.28,2.48 14.61,5.72 22.01,9.87l-1.97 6.97c-6.5,-3.48 -13.13,-6.27 -19.81,-8.38l-0.23 -8.46zm27.32 13c6.36,3.94 12.67,8.52 18.94,13.87l-4.18 5.05c-5.53,-4.71 -11.26,-8.8 -17.22,-12.35l2.46 -6.57zm19.22 22.91c0.27,0.25 0.54,0.51 0.81,0.76 4.93,4.71 9.35,9.63 13.3,14.75l6.56 -3.21c-4.51,-5.54 -9.61,-11 -15.4,-16.39 -0.2,-0.19 -0.4,-0.38 -0.6,-0.56l-4.67 4.65zm39.82 43.92c3.07,7.41 5.17,14.77 6.41,21.93l-10.57 -2.52c-1.01,-6.42 -2.79,-12.9 -5.31,-19.37l9.47 -0.04zm7.25 27.98c0.84,7.96 0.61,15.65 -0.55,22.9l-11.04 -6.14c1.22,-6.41 1.49,-13.11 0.85,-20.01l10.74 3.25zm-1.57 28.19c-1.83,8.03 -4.77,15.3 -8.74,21.87l-10.87 -10.41c3.97,-5.59 6.77,-11.72 8.55,-18.34l11.06 6.88zm-38.21 46.34c-8.54,3.55 -18.3,5.9 -28.9,6.67l-3.52 -16.83c8.9,-0.21 17.29,-1.78 24.91,-4.71l7.51 14.87zm-38.48 6.92c-11.29,-0.21 -23.25,-2.22 -35.37,-6.46l3.75 -17.32c9.95,3.7 19.94,5.87 29.53,6.52l2.09 17.26zm-87.62 -40.05c-0.51,-0.51 -1.01,-1.01 -1.52,-1.53 -9.67,-9.95 -17.18,-19.98 -22.82,-29.84l15.45 -5.9c5.34,8.84 12.29,17.53 20.91,25.71 0.08,0.07 0.14,0.13 0.22,0.21l-12.24 11.35zm-22.64 -80.24c-0.38,-8.73 0.78,-17.09 3.38,-24.74l-14.51 -5.55c-3.06,8.51 -4.87,18.1 -4.86,28.45l15.99 1.84zm5.32 -29.71c2.9,-6.55 6.94,-12.46 12.07,-17.53l-12.36 -9.06c-5.39,5.33 -10.19,12.2 -13.84,20.29l14.13 6.3zm40.07 -10.33c-2.03,1.67 -3.9,3.56 -5.6,5.64 -1.37,1.68 -2.6,3.38 -3.72,5.14l-13.11 -8.68c1.57,-2.16 3.32,-4.2 5.27,-6.13 2.22,-2.2 4.6,-4.17 7.1,-5.93l10.06 9.96zm16.75 -8.49c-4.59,1.23 -8.85,3.07 -12.71,5.55l-8.97 -10.19c4.86,-2.64 10.09,-4.55 15.6,-5.74l6.08 10.38zm20.22 -1.59c-5.31,-0.45 -10.48,-0.29 -15.37,0.54l-5.1 -10.31c5.85,-0.72 11.91,-0.69 18.11,0.07l2.36 9.7zm19.56 4.43c-4.91,-1.78 -9.83,-3.04 -14.66,-3.83l-1.52 -9.41c5.61,1.07 11.24,2.7 16.88,4.9l-0.7 8.34zm19.61 9.97c-4.69,-3.11 -9.5,-5.73 -14.34,-7.85l1.43 -7.91c5.53,2.56 10.98,5.65 16.3,9.27l-3.39 6.49zm16.24 13.34c-0.9,-0.91 -1.81,-1.78 -2.76,-2.67 -2.98,-2.78 -6.06,-5.34 -9.2,-7.67l3.95 -6.03c3.49,2.63 6.93,5.51 10.24,8.6 1.13,1.06 2.23,2.13 3.31,3.21l-5.54 4.56zm4.46 4.82c3.6,4.18 6.65,8.47 9.2,12.84l7.67 -2.23c-3.05,-4.97 -6.62,-9.83 -10.71,-14.53l-6.16 3.92zm20.24 16.52c2.88,5.48 5.14,11.02 6.79,16.55l-9.72 -0.59c-1.2,-4.79 -2.95,-9.6 -5.3,-14.42l8.23 -1.54zm-1.08 34.49c0.25,-4.48 -0.03,-9.13 -0.87,-13.91l10.16 1.34c1.28,5.6 1.91,11.12 1.9,16.46l-11.19 -3.89zm-4.63 18.6c1.94,-4.01 3.32,-8.47 4.06,-13.2l11.45 4.98c-0.57,5.71 -1.91,11.11 -4.03,16.09l-11.48 -7.87zm-12.43 14.73c1.42,-1 2.75,-2.08 3.99,-3.23 2.17,-2 4.08,-4.25 5.74,-6.75l11.21 8.95c-1.92,3.2 -4.21,6.16 -6.89,8.81 -1.33,1.32 -2.75,2.57 -4.25,3.74l-9.8 -11.52zm-19.71 8.05c5.47,-1.03 10.53,-2.77 15.04,-5.18l9.02 12.38c-5.36,3.19 -11.39,5.53 -17.92,7.01l-6.14 -14.21zm-52.09 -10.48c6.66,4.02 13.56,6.94 20.43,8.84l-1.01 14.96c-8.63,-2.14 -17.25,-5.54 -25.64,-10.32l6.22 -13.48zm-23.06 -19.92c2.3,2.64 4.78,5.25 7.44,7.83 2.9,2.81 5.89,5.34 8.98,7.63l-8.06 12.58c-3.43,-2.4 -6.76,-5.03 -10.02,-7.92 -4,-3.56 -7.71,-7.35 -11.06,-11.23l12.72 -8.89zm-15.54 -23.94c2.66,6.11 6.29,12.21 10.9,18.25l-13.83 7.3c-5.42,-7.47 -9.67,-15.33 -12.69,-23.25l15.62 -2.3zm-20.19 -36.2c1.04,-6.11 3,-11.86 5.97,-17.16l13.92 7.92c-2.3,4.56 -3.78,9.26 -4.51,14.2l-15.38 -4.96zm60.17 -24.86c-3.72,0.34 -7.27,1.08 -10.65,2.2l7.11 10.41c2.51,-0.98 5.27,-1.71 8.23,-2.13l-4.69 -10.48zm9.38 10.08l-3.41 -10.31c3.82,0.06 7.71,0.5 11.67,1.32l1.06 9.64c-3.22,-0.54 -6.34,-0.74 -9.32,-0.65zm47.87 24.39c-1.98,-2.45 -4.21,-4.83 -6.79,-7.24l6.14 -5.51c3.1,2.86 5.82,5.83 8.23,8.91l-7.58 3.84zm10.84 26.32c-0.09,-2.58 -0.51,-5.3 -1.2,-8l9.42 0.23c0.93,3.29 1.54,6.59 1.86,9.8l-10.08 -2.03zm1.84 33.18c2.29,-2.79 4.16,-6.03 5.54,-9.57l-11.16 -6.97c-1.32,2.54 -3.04,4.85 -5.03,6.92l10.65 9.62zm-13.73 9.76c3.41,-1.36 6.53,-3.12 9.22,-5.29l-9.81 -10.84c-2.17,1.59 -4.6,2.84 -7.25,3.79l7.84 12.34zm-18.65 3.36c4.22,-0.01 8.27,-0.46 12.09,-1.33l-6.37 -13.01c-2.95,0.56 -6.05,0.76 -9.28,0.62l3.56 13.72zm-26.95 -20.44l-4.63 12.88c-4.8,-2.38 -9.45,-5.31 -13.81,-8.83l8.46 -10.63c3.25,2.58 6.58,4.75 9.98,6.58zm-31.08 -36.23c0.95,3.49 2.44,7.11 4.58,10.81l-13.8 3.35c-2.62,-4.85 -4.56,-9.75 -5.78,-14.63l15 0.47zm-15.56 -20.63c-0.91,4.1 -1.14,8.32 -0.74,12.67l15.23 2.37c-0.37,-3.34 -0.26,-6.53 0.26,-9.54 0,0 0.01,-0.01 0.01,-0.01l-14.76 -5.49zm20.71 -25.71c-3.34,1.59 -6.41,3.6 -9.16,6.07l10.77 9.38c0.23,-0.25 0.45,-0.49 0.68,-0.74 1.63,-1.72 3.63,-3.24 5.95,-4.52l-8.24 -10.19z"/>
+    <path class="fil1" d="M358.41 182.43l6.23 0 -18.31 43.39 -1.42 0 -18.59 -43.39 6.22 0 13 30.34 12.87 -30.34zm15.2 0l6.21 0 0 43.2 -6.21 0 0 -43.2zm30.71 25.06l-4.69 -2.85c-2.96,-1.8 -5.06,-3.58 -6.31,-5.32 -1.24,-1.74 -1.87,-3.76 -1.87,-6.03 0,-3.41 1.19,-6.17 3.55,-8.3 2.35,-2.13 5.43,-3.19 9.2,-3.19 3.61,0 6.92,1.01 9.93,3.05l0 7.03c-3.11,-3.01 -6.46,-4.51 -10.05,-4.51 -2.02,0 -3.67,0.47 -4.97,1.41 -1.3,0.94 -1.96,2.13 -1.96,3.58 0,1.3 0.48,2.52 1.44,3.65 0.96,1.13 2.5,2.32 4.62,3.57l4.72 2.79c5.27,3.16 7.91,7.18 7.91,12.05 0,3.47 -1.16,6.29 -3.48,8.46 -2.33,2.17 -5.33,3.26 -9.05,3.26 -4.27,0 -8.16,-1.32 -11.67,-3.95l0 -7.86c3.34,4.24 7.21,6.36 11.6,6.36 1.94,0 3.55,-0.54 4.84,-1.63 1.29,-1.08 1.93,-2.43 1.93,-4.07 0,-2.64 -1.9,-5.14 -5.69,-7.5zm22.59 -25.06l6.2 0 0 43.2 -6.2 0 0 -43.2zm41.2 -0.63c6.67,0 12.23,2.11 16.66,6.34 4.44,4.22 6.66,9.53 6.66,15.9 0,6.38 -2.24,11.66 -6.71,15.83 -4.49,4.18 -10.14,6.27 -16.95,6.27 -6.51,0 -11.93,-2.09 -16.27,-6.27 -4.34,-4.17 -6.5,-9.41 -6.5,-15.7 0,-6.46 2.19,-11.81 6.55,-16.03 4.37,-4.23 9.89,-6.34 16.56,-6.34zm0.23 5.89c-4.94,0 -8.99,1.54 -12.17,4.63 -3.18,3.1 -4.77,7.04 -4.77,11.85 0,4.66 1.59,8.54 4.78,11.63 3.19,3.09 7.18,4.64 11.97,4.64 4.82,0 8.84,-1.58 12.06,-4.73 3.22,-3.16 4.82,-7.09 4.82,-11.79 0,-4.58 -1.6,-8.42 -4.82,-11.54 -3.22,-3.13 -7.18,-4.69 -11.87,-4.69zm69.26 -5.26l5.89 0 0 43.2 -5.33 0 -28.88 -33.27 0 33.27 -5.82 0 0 -43.2 5.02 0 29.12 33.55 0 -33.55z"/>
+    <path class="fil2" d="M576.97 200.48l0.37 0c2.72,0 4.78,-0.56 6.19,-1.66 1.41,-1.12 2.12,-2.74 2.12,-4.86 0,-1.91 -0.68,-3.47 -2.06,-4.67 -1.37,-1.19 -3.16,-1.79 -5.39,-1.79 -2.26,0 -4.75,0.7 -7.5,2.09l0 -5.9c2.52,-1.26 5.26,-1.89 8.23,-1.89 3.98,0 7.12,1.04 9.41,3.12 2.31,2.09 3.46,4.94 3.46,8.55 0,2.19 -0.45,4.04 -1.33,5.53 -0.89,1.5 -2.3,2.78 -4.25,3.86 1.7,0.65 2.94,1.47 3.73,2.43 0.78,0.96 1.39,2.11 1.82,3.47 0.44,1.36 0.66,2.81 0.66,4.33 0,3.78 -1.26,6.89 -3.78,9.35 -2.51,2.46 -5.69,3.7 -9.52,3.7 -3.29,0 -6.45,-0.8 -9.5,-2.39l0 -6.74c3.25,2.03 6.42,3.05 9.48,3.05 2.08,0 3.76,-0.63 5.02,-1.86 1.27,-1.24 1.9,-2.87 1.9,-4.91 0,-1.71 -0.53,-3.2 -1.57,-4.48 -0.62,-0.73 -1.31,-1.25 -2.06,-1.59 -0.75,-0.34 -2.37,-0.67 -4.87,-0.97l-0.56 -0.07 0 -5.7zm43.95 -18.25l0.62 -0.43 3.74 4.68c-3.3,2.14 -6.03,4.47 -8.21,6.99 -2.17,2.53 -3.85,5.49 -5.03,8.91 2.29,-1.18 4.57,-1.77 6.84,-1.77 3.41,0 6.28,1.21 8.61,3.63 2.33,2.42 3.49,5.39 3.49,8.9 0,3.62 -1.26,6.69 -3.8,9.22 -2.54,2.52 -5.62,3.78 -9.25,3.78 -4.06,0 -7.35,-1.44 -9.85,-4.3 -2.51,-2.86 -3.76,-6.6 -3.76,-11.22 0,-3.48 0.64,-6.93 1.93,-10.37 1.29,-3.44 3.15,-6.66 5.56,-9.67 2.43,-3.01 5.46,-5.78 9.11,-8.35zm-10.22 26.55c-0.15,0.98 -0.24,2.07 -0.24,3.26 0,2.45 0.71,4.46 2.12,6.03 1.41,1.57 3.22,2.37 5.43,2.37 1.97,0 3.61,-0.68 4.9,-2.02 1.29,-1.35 1.93,-3.04 1.93,-5.09 0,-2.09 -0.69,-3.79 -2.06,-5.08 -1.37,-1.29 -3.18,-1.94 -5.42,-1.94 -1.16,0 -2.2,0.18 -3.14,0.53 -0.94,0.35 -2.11,0.99 -3.52,1.94zm42.75 -26.98c3.95,0 7.22,2.08 9.81,6.24 2.58,4.17 3.87,9.45 3.87,15.85 0,6.57 -1.29,11.91 -3.87,16.02 -2.59,4.1 -5.94,6.16 -10.06,6.16 -4.18,0 -7.54,-2.01 -10.07,-6.04 -2.54,-4.03 -3.8,-9.37 -3.8,-16.02 0,-6.57 1.31,-11.91 3.92,-16.03 2.61,-4.12 6.01,-6.18 10.2,-6.18zm0.05 5.89l-0.3 0c-2.38,0 -4.26,1.46 -5.64,4.38 -1.39,2.92 -2.09,6.88 -2.09,11.89 0,5.12 0.68,9.13 2.04,12.04 1.36,2.92 3.24,4.37 5.62,4.37 2.39,0 4.28,-1.45 5.66,-4.37 1.39,-2.91 2.07,-6.86 2.07,-11.86 0,-5.02 -0.66,-9.02 -1.99,-11.99 -1.33,-2.97 -3.12,-4.46 -5.37,-4.46z"/>
+    <path class="fil2" d="M662.16 174.8c0,-1.29 0.47,-2.4 1.4,-3.33 0.92,-0.92 2.04,-1.38 3.35,-1.38 1.29,0 2.39,0.46 3.32,1.38 0.91,0.93 1.37,2.04 1.37,3.33 0,1.3 -0.46,2.42 -1.37,3.34 -0.93,0.92 -2.03,1.39 -3.32,1.39 -1.31,0 -2.43,-0.47 -3.35,-1.39 -0.93,-0.92 -1.4,-2.04 -1.4,-3.34zm1.85 -0.01c0,0.79 0.28,1.47 0.85,2.04 0.57,0.57 1.25,0.85 2.05,0.85 0.79,0 1.45,-0.28 2.01,-0.85 0.56,-0.57 0.84,-1.25 0.84,-2.04 0,-0.8 -0.28,-1.47 -0.83,-2.02 -0.55,-0.56 -1.23,-0.84 -2.02,-0.84 -0.81,0 -1.5,0.28 -2.06,0.84 -0.56,0.55 -0.84,1.22 -0.84,2.02z"/>
+    <path class="fil1" d="M683.23 158.34c1.17,0 2.32,0.3 3.44,0.91 1.12,0.6 1.99,1.46 2.61,2.59 0.63,1.12 0.94,2.29 0.94,3.51 0,1.2 -0.31,2.37 -0.92,3.48 -0.62,1.11 -1.48,1.98 -2.59,2.59 -1.11,0.62 -2.27,0.93 -3.48,0.93 -1.22,0 -2.38,-0.31 -3.49,-0.93 -1.11,-0.61 -1.98,-1.48 -2.6,-2.59 -0.61,-1.11 -0.92,-2.28 -0.92,-3.48 0,-1.22 0.31,-2.39 0.94,-3.51 0.63,-1.13 1.5,-1.99 2.62,-2.59 1.12,-0.61 2.27,-0.91 3.45,-0.91zm0 1.16c-0.99,0 -1.95,0.25 -2.88,0.76 -0.93,0.5 -1.66,1.22 -2.19,2.16 -0.52,0.94 -0.78,1.91 -0.78,2.93 0,1.01 0.26,1.97 0.77,2.9 0.52,0.92 1.24,1.64 2.17,2.16 0.93,0.52 1.89,0.78 2.91,0.78 1,0 1.97,-0.26 2.9,-0.78 0.93,-0.52 1.65,-1.24 2.16,-2.16 0.52,-0.93 0.77,-1.89 0.77,-2.9 0,-1.02 -0.26,-1.99 -0.78,-2.93 -0.53,-0.94 -1.25,-1.66 -2.19,-2.16 -0.93,-0.51 -1.89,-0.76 -2.86,-0.76zm-3.08 9.71l0 -7.52 2.59 0c0.89,0 1.53,0.07 1.92,0.2 0.4,0.14 0.72,0.38 0.95,0.73 0.24,0.35 0.35,0.72 0.35,1.1 0,0.55 -0.19,1.03 -0.59,1.44 -0.39,0.41 -0.91,0.64 -1.57,0.69 0.27,0.11 0.49,0.24 0.65,0.4 0.3,0.29 0.67,0.79 1.11,1.49l0.92 1.47 -1.48 0 -0.67 -1.18c-0.53,-0.94 -0.95,-1.52 -1.28,-1.76 -0.22,-0.17 -0.54,-0.26 -0.97,-0.25l-0.71 0 0 3.19 -1.22 0zm1.22 -4.24l1.47 0c0.71,0 1.19,-0.1 1.45,-0.31 0.25,-0.21 0.38,-0.49 0.38,-0.83 0,-0.22 -0.06,-0.42 -0.18,-0.6 -0.13,-0.17 -0.3,-0.3 -0.52,-0.39 -0.22,-0.08 -0.62,-0.13 -1.22,-0.13l-1.38 0 0 2.26z"/>
+   </g>
+   <g>
+    <g>
+     <polygon class="fil3" points="321.89,288.49 321.89,291.5 313.58,291.5 313.58,312.31 310.16,312.31 310.16,291.5 301.98,291.5 301.98,288.49 "/>
+     <path id="_1" class="fil3" d="M337.78 307.74l0 3.04c-1.91,1.23 -3.96,1.85 -6.15,1.85 -2.18,0 -3.99,-0.74 -5.41,-2.2 -1.56,-1.61 -2.34,-3.62 -2.34,-6.04 0,-2.43 0.69,-4.38 2.06,-5.85 1.38,-1.48 3.13,-2.22 5.27,-2.22 1.8,0 3.29,0.57 4.48,1.71 1.18,1.14 1.92,2.6 2.2,4.36 0.11,0.7 0.17,1.48 0.17,2.34l-11.04 0c0.07,1.33 0.54,2.48 1.4,3.46 0.86,0.98 2.09,1.47 3.67,1.47 2.05,0 3.94,-0.64 5.69,-1.92zm-10.69 -4.86l7.9 0c-0.03,-0.3 -0.07,-0.6 -0.14,-0.9 -0.07,-0.31 -0.22,-0.71 -0.44,-1.23 -0.22,-0.51 -0.61,-0.93 -1.17,-1.25 -0.56,-0.33 -1.24,-0.49 -2.06,-0.49 -1.21,0 -2.21,0.44 -3,1.32 -0.56,0.61 -0.92,1.46 -1.09,2.55z"/>
+     <path id="_2" class="fil3" d="M352.83 297.4l0 3.32c-1.56,-1 -3.01,-1.5 -4.36,-1.5 -1.52,0 -2.69,0.53 -3.53,1.59 -0.84,1.06 -1.26,2.27 -1.26,3.64 0,1.47 0.45,2.71 1.35,3.72 0.89,1.02 2.24,1.52 4.03,1.52 1.21,0 2.59,-0.35 4.12,-1.04l0 3.07c-1.72,0.6 -3.25,0.91 -4.57,0.91 -2.59,0 -4.58,-0.78 -5.98,-2.33 -1.39,-1.54 -2.09,-3.46 -2.09,-5.74 0,-1 0.15,-1.97 0.44,-2.9 0.29,-0.93 0.73,-1.81 1.32,-2.64 0.6,-0.82 1.41,-1.48 2.45,-1.97 1.03,-0.49 2.22,-0.73 3.54,-0.73 1.35,0 2.87,0.36 4.54,1.08z"/>
+     <path id="_3" class="fil3" d="M359.71 288.49l0 10.2c1.33,-1.58 2.94,-2.37 4.82,-2.37 1.12,0 2.09,0.28 2.92,0.85 0.83,0.57 1.41,1.28 1.76,2.12 0.4,1 0.6,2.36 0.6,4.08l0 8.94 -3.11 0 0 -9.71c0,-0.97 -0.19,-1.78 -0.56,-2.41 -0.58,-0.95 -1.41,-1.43 -2.48,-1.43 -1.28,0 -2.6,0.77 -3.95,2.31l0 11.24 -3.11 0 0 -23.82 3.11 0z"/>
+     <polygon class="fil3" points="665.47,288.41 665.47,309.12 676.19,309.12 676.19,312.23 662.01,312.23 662.01,288.41 "/>
+     <path id="_1_0" class="fil3" d="M679.06 290.5c0.34,-0.37 0.78,-0.56 1.29,-0.56 0.51,0 0.95,0.18 1.31,0.54 0.36,0.37 0.54,0.79 0.54,1.28 0,0.49 -0.18,0.92 -0.54,1.29 -0.36,0.37 -0.8,0.56 -1.31,0.56 -0.56,0 -1,-0.2 -1.33,-0.59 -0.33,-0.4 -0.49,-0.82 -0.49,-1.26 0,-0.47 0.18,-0.89 0.53,-1.26zm2.86 6.04l0 15.69 -3.11 0 0 -15.69 3.11 0z"/>
+     <path id="_2_1" class="fil3" d="M698.89 296.54l0 2.41 -3.21 0c1.09,1.1 1.64,2.24 1.64,3.43 0,0.6 -0.14,1.24 -0.43,1.92 -0.3,0.67 -0.64,1.21 -1.04,1.6 -0.58,0.63 -1.42,1.07 -2.51,1.31 -1.09,0.25 -2.01,0.46 -2.74,0.63 -0.74,0.18 -1.1,0.52 -1.1,1.03 0,0.42 0.38,0.78 1.13,1.09 0.76,0.3 1.98,0.61 3.65,0.94 3.03,0.6 4.54,2.06 4.54,4.36 0,1.56 -0.65,2.79 -1.95,3.67 -1.31,0.89 -3.12,1.33 -5.45,1.33 -2.12,0 -3.85,-0.45 -5.2,-1.35 -1.36,-0.89 -2.03,-2.03 -2.03,-3.4 0,-1.17 0.32,-2.1 0.96,-2.8 0.64,-0.69 1.64,-1.21 2.99,-1.53 -1.05,-0.65 -1.58,-1.32 -1.58,-1.99 0,-0.51 0.23,-0.97 0.69,-1.36 0.45,-0.4 1.05,-0.69 1.79,-0.88l0 -0.07c-1.14,-0.49 -2.01,-1.15 -2.62,-1.99 -0.55,-0.79 -0.83,-1.77 -0.83,-2.93 0,-1.68 0.61,-3 1.83,-3.97 1.22,-0.96 2.89,-1.45 5.01,-1.45l6.46 0zm-4.36 5.45c0,-0.74 -0.31,-1.39 -0.91,-1.94 -0.61,-0.54 -1.32,-0.82 -2.13,-0.82 -0.86,0 -1.6,0.28 -2.2,0.84 -0.61,0.56 -0.91,1.22 -0.91,1.99 0,0.86 0.29,1.56 0.87,2.08 0.59,0.52 1.34,0.79 2.27,0.79 0.89,0 1.61,-0.28 2.17,-0.82 0.56,-0.55 0.84,-1.26 0.84,-2.12zm1.29 13.52c0,-0.61 -0.31,-1.11 -0.93,-1.52 -0.61,-0.41 -1.28,-0.68 -2,-0.8 -0.73,-0.13 -1.46,-0.2 -2.2,-0.2 -1.05,0 -1.91,0.23 -2.57,0.67 -0.67,0.44 -1,1.01 -1,1.71 0,1.61 1.46,2.41 4.37,2.41 1.37,0 2.44,-0.2 3.19,-0.59 0.76,-0.4 1.14,-0.96 1.14,-1.68z"/>
+     <path id="_3_2" class="fil3" d="M704.34 288.41l0 10.19c1.33,-1.58 2.93,-2.37 4.82,-2.37 1.12,0 2.09,0.29 2.92,0.86 0.82,0.57 1.41,1.27 1.76,2.11 0.4,1 0.59,2.36 0.59,4.09l0 8.94 -3.1 0 0 -9.71c0,-0.98 -0.19,-1.78 -0.56,-2.41 -0.58,-0.96 -1.41,-1.43 -2.48,-1.43 -1.28,0 -2.6,0.76 -3.95,2.3l0 11.25 -3.11 0 0 -23.82 3.11 0z"/>
+     <path id="_4" class="fil3" d="M722.4 293.3l0 3.24 4.96 0 0 2.8 -4.96 0 0 6.84c0.02,1 0.06,1.66 0.12,1.98 0.06,0.31 0.2,0.61 0.44,0.89 0.41,0.44 0.97,0.66 1.67,0.66 1.14,0 2.32,-0.37 3.53,-1.12l0 2.9c-1.28,0.7 -2.62,1.05 -4.02,1.05 -0.67,0 -1.4,-0.16 -2.18,-0.47 -0.78,-0.32 -1.41,-0.82 -1.9,-1.52 -0.51,-0.77 -0.77,-2.19 -0.77,-4.26l0 -6.95 -2.73 0 0 -0.32 5.84 -5.72z"/>
+     <path class="fil3" d="M193.08 290.12l0 3.88c-1.73,-1.66 -3.59,-2.48 -5.59,-2.48 -1.14,0 -2.05,0.26 -2.74,0.8 -0.69,0.53 -1.03,1.19 -1.03,1.96 0,0.95 0.36,1.74 1.1,2.37 0.73,0.63 2.34,1.68 4.83,3.14 1.31,0.77 2.33,1.66 3.08,2.66 0.86,1.12 1.29,2.43 1.29,3.94 0,1.89 -0.63,3.44 -1.89,4.67 -1.25,1.22 -2.93,1.83 -5.02,1.83 -2.36,0 -4.5,-0.73 -6.43,-2.2l0 -4.33c1.86,2.33 4,3.49 6.43,3.49 0.95,0 1.81,-0.28 2.56,-0.85 0.76,-0.57 1.14,-1.34 1.14,-2.29 0,-1.52 -1.05,-2.89 -3.15,-4.12 -2.04,-1.24 -3.42,-2.1 -4.12,-2.59 -0.7,-0.49 -1.29,-1.05 -1.78,-1.67 -0.79,-1.03 -1.19,-2.22 -1.19,-3.57 0,-1.84 0.64,-3.35 1.93,-4.54 1.28,-1.18 2.98,-1.78 5.09,-1.78 1.96,0 3.79,0.56 5.49,1.68z"/>
+     <path id="_1_3" class="fil3" d="M200.97 293.65l0 3.24 4.96 0 0 2.8 -4.96 0 0 6.84c0.02,1 0.06,1.66 0.12,1.98 0.06,0.31 0.21,0.61 0.44,0.89 0.42,0.44 0.98,0.66 1.68,0.66 1.14,0 2.31,-0.37 3.52,-1.12l0 2.9c-1.28,0.7 -2.62,1.05 -4.01,1.05 -0.68,0 -1.41,-0.16 -2.19,-0.47 -0.78,-0.32 -1.41,-0.82 -1.9,-1.52 -0.51,-0.77 -0.77,-2.19 -0.77,-4.26l0 -6.95 -2.72 0 0 -0.32 5.83 -5.72z"/>
+     <path id="_2_4" class="fil3" d="M222.55 312.58l-3.14 0 0 -2c-1.4,1.54 -2.98,2.31 -4.75,2.31 -0.72,0 -1.5,-0.18 -2.34,-0.54 -0.84,-0.36 -1.54,-1.02 -2.09,-1.97 -0.59,-0.91 -0.88,-2.43 -0.88,-4.54l0 -8.95 3.15 0 0 8.95c0,0.48 0,0.87 0.01,1.17 0.02,0.29 0.08,0.67 0.2,1.15 0.11,0.48 0.27,0.85 0.47,1.12 0.2,0.26 0.51,0.5 0.94,0.71 0.43,0.21 0.95,0.32 1.55,0.32 1.45,0 2.69,-0.74 3.74,-2.2l0 -11.22 3.14 0 0 15.69z"/>
+     <path id="_3_5" class="fil3" d="M240.51 288.76l0 23.82 -6.64 0c-1.44,0 -2.69,-0.28 -3.75,-0.82 -1.06,-0.55 -1.86,-1.26 -2.38,-2.14 -0.52,-0.87 -0.9,-1.73 -1.13,-2.58 -0.24,-0.85 -0.35,-1.71 -0.35,-2.57 0,-2.42 0.76,-4.34 2.28,-5.76 1.53,-1.42 3.34,-2.13 5.43,-2.13 1.19,0 2.32,0.21 3.39,0.63l0 -8.45 3.15 0zm-3.15 21.2l0 -9.99c-0.93,-0.49 -1.89,-0.74 -2.9,-0.74 -1.42,0 -2.62,0.48 -3.59,1.42 -0.98,0.94 -1.47,2.34 -1.47,4.21 0,2.3 0.77,3.84 2.3,4.61 0.66,0.32 1.75,0.49 3.29,0.49l2.37 0z"/>
+     <path id="_4_6" class="fil3" d="M245.05 290.85c0.35,-0.37 0.78,-0.56 1.29,-0.56 0.51,0 0.95,0.18 1.31,0.54 0.36,0.37 0.54,0.79 0.54,1.28 0,0.49 -0.18,0.92 -0.54,1.29 -0.36,0.37 -0.8,0.56 -1.31,0.56 -0.56,0 -1,-0.2 -1.33,-0.59 -0.32,-0.4 -0.49,-0.82 -0.49,-1.26 0,-0.47 0.18,-0.89 0.53,-1.26zm2.86 6.04l0 15.69 -3.11 0 0 -15.69 3.11 0z"/>
+     <path id="_5" class="fil3" d="M259.89 296.58c2.37,0 4.35,0.76 5.94,2.27 1.58,1.51 2.37,3.49 2.37,5.94 0,2.58 -0.85,4.58 -2.57,5.99 -1.71,1.41 -3.66,2.11 -5.85,2.11 -2.46,0 -4.47,-0.79 -6.02,-2.37 -1.55,-1.59 -2.32,-3.52 -2.32,-5.8 0,-2.28 0.77,-4.21 2.32,-5.78 1.55,-1.57 3.59,-2.36 6.13,-2.36zm-0.17 2.79c-1.47,0 -2.69,0.48 -3.66,1.44 -0.96,0.95 -1.44,2.27 -1.44,3.94 0,1.8 0.53,3.13 1.6,4.02 1.07,0.88 2.28,1.33 3.63,1.33 1.54,0 2.79,-0.5 3.74,-1.51 0.96,-1 1.43,-2.29 1.43,-3.87 0,-1.8 -0.54,-3.13 -1.64,-4.02 -1.09,-0.88 -2.31,-1.33 -3.66,-1.33z"/>
+     <rect class="fil4" x="282.5" y="277.16" width="2.52" height="46.94"/>
+     <rect class="fil4" x="379.12" y="277.16" width="2.52" height="46.94"/>
+     <rect class="fil4" x="491.98" y="277.16" width="2.52" height="46.94"/>
+     <rect class="fil4" x="641.93" y="277.16" width="2.52" height="46.94"/>
+     <polygon class="fil3" points="534.02,288.67 534.02,312.48 530.6,312.48 530.6,293.94 523.26,303.16 522.63,303.16 515.23,293.94 515.23,312.48 511.81,312.48 511.81,288.67 515.02,288.67 522.95,298.44 530.84,288.67 "/>
+     <path id="_1_7" class="fil3" d="M551.83 307.91l0 3.04c-1.91,1.23 -3.96,1.85 -6.15,1.85 -2.19,0 -3.99,-0.73 -5.41,-2.2 -1.56,-1.61 -2.34,-3.62 -2.34,-6.04 0,-2.42 0.69,-4.37 2.06,-5.85 1.37,-1.48 3.13,-2.22 5.27,-2.22 1.8,0 3.29,0.57 4.47,1.71 1.19,1.14 1.93,2.6 2.21,4.37 0.11,0.69 0.17,1.47 0.17,2.34l-11.04 0c0.07,1.32 0.54,2.48 1.4,3.45 0.86,0.98 2.08,1.47 3.67,1.47 2.05,0 3.94,-0.64 5.69,-1.92zm-10.69 -4.86l7.9 0c-0.03,-0.3 -0.07,-0.6 -0.14,-0.9 -0.07,-0.31 -0.22,-0.71 -0.44,-1.23 -0.22,-0.51 -0.61,-0.93 -1.17,-1.25 -0.56,-0.33 -1.25,-0.49 -2.06,-0.49 -1.21,0 -2.21,0.44 -3,1.33 -0.56,0.6 -0.92,1.45 -1.09,2.54z"/>
+     <path id="_2_8" class="fil3" d="M567.76 309.69l0 1.89c-1.24,0.81 -2.24,1.22 -3.01,1.22 -1.33,0 -2.12,-0.54 -2.37,-1.61 -1.35,1.07 -2.76,1.61 -4.23,1.61 -1.12,0 -2.04,-0.38 -2.76,-1.14 -0.72,-0.75 -1.08,-1.65 -1.08,-2.7 0,-0.61 0.12,-1.16 0.35,-1.64 0.23,-0.49 0.48,-0.88 0.75,-1.17 0.27,-0.3 0.7,-0.6 1.31,-0.91 0.6,-0.32 1.06,-0.54 1.38,-0.67 0.31,-0.12 0.83,-0.32 1.55,-0.57l2.76 -0.98 0 -0.84c0,-1.84 -0.94,-2.76 -2.83,-2.76 -1.86,0 -3.51,0.86 -4.96,2.59l0 -3.39c1.22,-1.42 2.95,-2.13 5.21,-2.13 1.67,0 3.04,0.44 4.1,1.31 1.06,0.87 1.59,2.16 1.59,3.86l0 8.07c0,0.53 0.2,0.8 0.59,0.8 0.35,0 0.9,-0.28 1.65,-0.84zm-5.35 -0.38l0 -4.58c-1.65,0.56 -2.89,1.1 -3.72,1.63 -0.82,0.52 -1.24,1.2 -1.24,2.04 0,0.65 0.21,1.18 0.63,1.59 0.42,0.4 0.96,0.61 1.61,0.61 0.91,0 1.81,-0.43 2.72,-1.29z"/>
+     <path id="_3_9" class="fil3" d="M579.46 297.78l0 3.07c-1.8,-1.11 -3.31,-1.67 -4.54,-1.67 -0.68,0 -1.18,0.14 -1.51,0.44 -0.32,0.29 -0.49,0.61 -0.49,0.96 0,0.44 0.21,0.83 0.63,1.17 0.42,0.33 1.24,0.84 2.45,1.51 0.14,0.07 0.24,0.13 0.31,0.18 2.61,1.42 3.91,3.06 3.91,4.92 0,0.42 -0.08,0.87 -0.26,1.33 -0.17,0.47 -0.45,0.94 -0.82,1.43 -0.37,0.49 -0.93,0.89 -1.68,1.21 -0.74,0.31 -1.61,0.47 -2.61,0.47 -1.54,0 -3.29,-0.48 -5.24,-1.43l0 -3.36c2,1.38 3.66,2.07 4.99,2.07 0.56,0 1.09,-0.15 1.61,-0.44 0.51,-0.29 0.77,-0.68 0.77,-1.17 0,-0.51 -0.18,-0.93 -0.55,-1.24 -0.36,-0.32 -0.98,-0.72 -1.86,-1.21 -1.61,-0.88 -2.82,-1.71 -3.64,-2.49 -0.81,-0.78 -1.22,-1.77 -1.22,-2.95 0,-1.17 0.46,-2.14 1.38,-2.92 0.92,-0.78 2.13,-1.17 3.62,-1.17 1.51,0 3.09,0.43 4.75,1.29z"/>
+     <path id="_4_10" class="fil3" d="M596.92 312.48l-3.15 0 0 -1.99c-1.39,1.54 -2.98,2.31 -4.75,2.31 -0.72,0 -1.5,-0.18 -2.34,-0.54 -0.83,-0.36 -1.53,-1.02 -2.09,-1.98 -0.58,-0.9 -0.87,-2.42 -0.87,-4.54l0 -8.94 3.14 0 0 8.94c0,0.49 0,0.88 0.02,1.17 0.01,0.29 0.07,0.68 0.19,1.16 0.12,0.47 0.27,0.85 0.47,1.11 0.2,0.27 0.51,0.51 0.94,0.72 0.43,0.21 0.95,0.31 1.56,0.31 1.44,0 2.69,-0.73 3.73,-2.2l0 -11.21 3.15 0 0 15.68z"/>
+     <path id="_5_11" class="fil3" d="M601.14 296.8l3.11 0 0 3.6c0.37,-0.58 0.67,-1.02 0.89,-1.33 0.22,-0.3 0.55,-0.69 0.98,-1.17 0.43,-0.47 0.88,-0.83 1.34,-1.06 0.47,-0.23 0.96,-0.35 1.47,-0.35 1.21,0 2.44,0.59 3.67,1.78l-1.64 2.72c-0.33,-0.32 -0.78,-0.66 -1.35,-1.01 -0.57,-0.35 -1.12,-0.52 -1.66,-0.52 -0.79,0 -1.6,0.41 -2.44,1.22 -0.84,0.82 -1.26,2.01 -1.26,3.6l0 8.2 -3.11 0 0 -15.68z"/>
+     <path id="_6" class="fil3" d="M627.86 307.91l0 3.04c-1.91,1.23 -3.96,1.85 -6.15,1.85 -2.18,0 -3.99,-0.73 -5.41,-2.2 -1.56,-1.61 -2.34,-3.62 -2.34,-6.04 0,-2.42 0.69,-4.37 2.06,-5.85 1.38,-1.48 3.13,-2.22 5.28,-2.22 1.79,0 3.28,0.57 4.47,1.71 1.18,1.14 1.92,2.6 2.2,4.37 0.11,0.69 0.17,1.47 0.17,2.34l-11.04 0c0.07,1.32 0.54,2.48 1.4,3.45 0.86,0.98 2.09,1.47 3.67,1.47 2.05,0 3.94,-0.64 5.69,-1.92zm-10.69 -4.86l7.9 0c-0.03,-0.3 -0.07,-0.6 -0.14,-0.9 -0.07,-0.31 -0.22,-0.71 -0.44,-1.23 -0.22,-0.51 -0.61,-0.93 -1.17,-1.25 -0.56,-0.33 -1.24,-0.49 -2.06,-0.49 -1.21,0 -2.21,0.44 -3,1.33 -0.56,0.6 -0.92,1.45 -1.09,2.54z"/>
+     <polygon class="fil3" points="421.09,288.58 421.09,312.4 417.67,312.4 417.67,293.85 410.33,303.07 409.71,303.07 402.3,293.85 402.3,312.4 398.88,312.4 398.88,288.58 402.09,288.58 410.02,298.36 417.91,288.58 "/>
+     <path id="_1_12" class="fil3" d="M426.12 290.68c0.35,-0.38 0.78,-0.56 1.29,-0.56 0.51,0 0.95,0.18 1.31,0.54 0.36,0.36 0.54,0.78 0.54,1.27 0,0.49 -0.18,0.92 -0.54,1.3 -0.36,0.37 -0.8,0.55 -1.31,0.55 -0.56,0 -1,-0.19 -1.33,-0.59 -0.32,-0.4 -0.48,-0.81 -0.48,-1.26 0,-0.46 0.17,-0.88 0.52,-1.25zm2.86 6.04l0 15.68 -3.1 0 0 -15.68 3.1 0z"/>
+     <path id="_2_13" class="fil3" d="M444.87 297.49l0 3.31c-1.56,-1 -3.01,-1.5 -4.36,-1.5 -1.51,0 -2.69,0.53 -3.53,1.59 -0.84,1.06 -1.26,2.28 -1.26,3.65 0,1.47 0.45,2.71 1.35,3.72 0.9,1.01 2.24,1.52 4.03,1.52 1.21,0 2.59,-0.35 4.12,-1.05l0 3.08c-1.72,0.6 -3.24,0.9 -4.57,0.9 -2.59,0 -4.58,-0.77 -5.97,-2.32 -1.4,-1.55 -2.1,-3.46 -2.1,-5.74 0,-1.01 0.15,-1.97 0.44,-2.9 0.29,-0.93 0.73,-1.81 1.32,-2.64 0.6,-0.83 1.41,-1.48 2.45,-1.97 1.04,-0.49 2.22,-0.74 3.54,-0.74 1.35,0 2.87,0.36 4.54,1.09z"/>
+     <path id="_3_14" class="fil3" d="M448.58 296.72l3.1 0 0 3.6c0.38,-0.59 0.67,-1.03 0.9,-1.33 0.22,-0.3 0.54,-0.7 0.97,-1.17 0.43,-0.48 0.88,-0.83 1.35,-1.07 0.46,-0.23 0.95,-0.35 1.46,-0.35 1.22,0 2.44,0.6 3.67,1.78l-1.64 2.73c-0.33,-0.33 -0.77,-0.67 -1.34,-1.01 -0.57,-0.35 -1.13,-0.53 -1.66,-0.53 -0.79,0 -1.61,0.41 -2.45,1.22 -0.84,0.82 -1.26,2.02 -1.26,3.6l0 8.21 -3.1 0 0 -15.68z"/>
+     <path id="_4_15" class="fil3" d="M469.71 296.4c2.37,0 4.35,0.76 5.93,2.27 1.59,1.52 2.38,3.5 2.38,5.94 0,2.59 -0.86,4.58 -2.57,5.99 -1.71,1.41 -3.66,2.11 -5.85,2.11 -2.47,0 -4.47,-0.79 -6.02,-2.37 -1.55,-1.59 -2.33,-3.52 -2.33,-5.8 0,-2.28 0.78,-4.21 2.33,-5.78 1.55,-1.57 3.59,-2.36 6.13,-2.36zm-0.18 2.8c-1.46,0 -2.68,0.47 -3.65,1.43 -0.96,0.95 -1.45,2.27 -1.45,3.95 0,1.79 0.54,3.13 1.61,4.01 1.07,0.89 2.28,1.33 3.63,1.33 1.54,0 2.78,-0.5 3.74,-1.5 0.95,-1 1.43,-2.3 1.43,-3.88 0,-1.79 -0.55,-3.13 -1.64,-4.02 -1.1,-0.88 -2.32,-1.32 -3.67,-1.32z"/>
+     <polygon class="fil3" points="82.95,288.76 72.89,312.72 72.12,312.72 61.85,288.76 65.27,288.76 72.43,305.49 79.56,288.76 "/>
+     <path id="_1_16" class="fil3" d="M85.46 290.85c0.35,-0.37 0.78,-0.56 1.29,-0.56 0.52,0 0.95,0.18 1.31,0.54 0.36,0.37 0.54,0.79 0.54,1.28 0,0.49 -0.18,0.92 -0.54,1.29 -0.36,0.37 -0.79,0.56 -1.31,0.56 -0.56,0 -1,-0.2 -1.32,-0.59 -0.33,-0.4 -0.49,-0.82 -0.49,-1.26 0,-0.47 0.17,-0.89 0.52,-1.26zm2.87 6.04l0 15.69 -3.11 0 0 -15.69 3.11 0z"/>
+     <path id="_2_17" class="fil3" d="M101.88 297.87l0 3.08c-1.8,-1.12 -3.31,-1.68 -4.54,-1.68 -0.68,0 -1.18,0.14 -1.51,0.44 -0.32,0.29 -0.49,0.61 -0.49,0.96 0,0.44 0.21,0.83 0.63,1.17 0.42,0.33 1.24,0.84 2.45,1.52 0.14,0.07 0.24,0.12 0.31,0.17 2.61,1.42 3.91,3.06 3.91,4.92 0,0.42 -0.08,0.87 -0.26,1.33 -0.17,0.47 -0.45,0.95 -0.82,1.43 -0.37,0.49 -0.93,0.89 -1.68,1.21 -0.74,0.31 -1.61,0.47 -2.61,0.47 -1.54,0 -3.29,-0.48 -5.24,-1.43l0 -3.35c2,1.37 3.66,2.06 4.99,2.06 0.56,0 1.1,-0.15 1.61,-0.44 0.51,-0.29 0.77,-0.68 0.77,-1.17 0,-0.51 -0.18,-0.93 -0.55,-1.24 -0.36,-0.31 -0.98,-0.72 -1.86,-1.21 -1.61,-0.88 -2.82,-1.71 -3.64,-2.49 -0.81,-0.78 -1.22,-1.77 -1.22,-2.95 0,-1.17 0.46,-2.14 1.38,-2.92 0.92,-0.78 2.13,-1.17 3.62,-1.17 1.51,0 3.09,0.43 4.75,1.29z"/>
+     <path id="_3_18" class="fil3" d="M106.56 290.85c0.34,-0.37 0.78,-0.56 1.29,-0.56 0.51,0 0.95,0.18 1.31,0.54 0.36,0.37 0.54,0.79 0.54,1.28 0,0.49 -0.18,0.92 -0.54,1.29 -0.36,0.37 -0.8,0.56 -1.31,0.56 -0.56,0 -1,-0.2 -1.33,-0.59 -0.32,-0.4 -0.49,-0.82 -0.49,-1.26 0,-0.47 0.18,-0.89 0.53,-1.26zm2.86 6.04l0 15.69 -3.11 0 0 -15.69 3.11 0z"/>
+     <path id="_4_19" class="fil3" d="M121.4 296.58c2.37,0 4.35,0.76 5.94,2.27 1.58,1.51 2.37,3.49 2.37,5.94 0,2.58 -0.85,4.58 -2.57,5.99 -1.71,1.41 -3.66,2.11 -5.85,2.11 -2.46,0 -4.47,-0.79 -6.02,-2.37 -1.55,-1.59 -2.32,-3.52 -2.32,-5.8 0,-2.28 0.77,-4.21 2.32,-5.78 1.55,-1.57 3.59,-2.36 6.13,-2.36zm-0.18 2.79c-1.46,0 -2.68,0.48 -3.65,1.44 -0.96,0.95 -1.45,2.27 -1.45,3.94 0,1.8 0.54,3.13 1.61,4.02 1.07,0.88 2.28,1.33 3.63,1.33 1.54,0 2.79,-0.5 3.74,-1.51 0.96,-1 1.43,-2.29 1.43,-3.87 0,-1.8 -0.54,-3.13 -1.64,-4.02 -1.09,-0.88 -2.32,-1.33 -3.67,-1.33z"/>
+     <path id="_5_20" class="fil3" d="M133.1 296.89l3.18 0 0 1.99c1.37,-1.53 2.94,-2.3 4.71,-2.3 0.72,0 1.5,0.18 2.34,0.54 0.84,0.36 1.54,1.02 2.1,1.97 0.58,0.91 0.87,2.43 0.87,4.55l0 8.94 -3.14 0 0 -8.94c0,-0.98 -0.05,-1.7 -0.14,-2.15 -0.1,-0.46 -0.33,-0.91 -0.7,-1.35 -0.58,-0.65 -1.36,-0.98 -2.34,-0.98 -1.44,0 -2.68,0.74 -3.7,2.2l0 11.22 -3.18 0 0 -15.69z"/>
+     <rect class="fil4" x="160.68" y="277.16" width="2.52" height="46.94"/>
+    </g>
+   </g>
+  </g>
+  <rect class="fil5" width="790.01" height="368.11"/>
+ </g>
+</svg>
+<svg id="lg-dark" class="logo logo-dark" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 740.72 345.14"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    #lg-dark .fil4 {fill:none}
+    #lg-dark .fil3 {fill:#FEFEFE}
+    #lg-dark .fil0 {fill:#C5691D}
+    #lg-dark .fil1 {fill:#FEFEFE;fill-rule:nonzero}
+    #lg-dark .fil2 {fill:#C5691D;fill-rule:nonzero}
+   ]]>
+  </style>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <g id="_2778040713584">
+   <g>
+    <path class="fil0" d="M137.1 45.02c-6.81,2.17 -12.85,5.16 -17.91,8.77 -0.52,0.37 -1,0.73 -1.51,1.13l10.95 8.98c4.87,-3.99 10.3,-7.04 16.28,-9.26l-7.81 -9.62zm32.1 -3.76c7.34,0.44 15.03,1.71 22.86,3.94l0.8 8.22c-6.84,-1.79 -13.58,-2.79 -20.22,-3.01l-3.44 -9.15zm28.35 5.65c6.83,2.32 13.7,5.36 20.64,9.25l-1.85 6.54c-6.09,-3.27 -12.31,-5.88 -18.58,-7.86l-0.21 -7.93zm25.61 12.18c5.97,3.7 11.89,8 17.76,13.01l-3.92 4.74c-5.17,-4.42 -10.55,-8.26 -16.14,-11.59l2.3 -6.16zm18.03 21.49c0.25,0.23 0.5,0.48 0.75,0.71 4.63,4.41 8.78,9.03 12.48,13.83l6.14 -3.01c-4.22,-5.2 -9,-10.32 -14.43,-15.37 -0.19,-0.17 -0.38,-0.35 -0.56,-0.52l-4.38 4.36zm37.33 41.18c2.88,6.95 4.85,13.84 6.01,20.56l-9.9 -2.36c-0.95,-6.02 -2.62,-12.1 -4.98,-18.17l8.87 -0.03zm6.8 26.23c0.79,7.46 0.57,14.67 -0.51,21.48l-10.36 -5.77c1.15,-6.01 1.4,-12.29 0.8,-18.75l10.07 3.04zm-1.47 26.43c-1.72,7.53 -4.48,14.35 -8.2,20.51l-10.19 -9.77c3.73,-5.23 6.35,-10.98 8.02,-17.19l10.37 6.45zm-35.82 43.45c-8.01,3.33 -17.16,5.53 -27.11,6.25l-3.29 -15.77c8.34,-0.2 16.21,-1.67 23.35,-4.42l7.05 13.94zm-36.09 6.49c-10.58,-0.2 -21.8,-2.08 -33.15,-6.06l3.5 -16.23c9.34,3.47 18.7,5.5 27.7,6.1l1.95 16.19zm-82.15 -37.55c-0.48,-0.48 -0.95,-0.95 -1.42,-1.44 -9.07,-9.33 -16.11,-18.73 -21.4,-27.98l14.48 -5.53c5.02,8.29 11.53,16.44 19.61,24.11 0.07,0.07 0.13,0.12 0.2,0.19l-11.47 10.65zm-21.22 -75.24c-0.36,-8.18 0.72,-16.02 3.17,-23.19l-13.61 -5.21c-2.87,7.98 -4.56,16.98 -4.56,26.67l15 1.73zm4.99 -27.85c2.71,-6.14 6.5,-11.68 11.31,-16.44l-11.59 -8.49c-5.05,4.99 -9.55,11.44 -12.98,19.02l13.26 5.91zm37.56 -9.68c-1.9,1.56 -3.66,3.33 -5.25,5.28 -1.28,1.57 -2.44,3.17 -3.48,4.82l-12.3 -8.14c1.47,-2.02 3.11,-3.93 4.94,-5.74 2.09,-2.07 4.31,-3.92 6.66,-5.56l9.43 9.34zm15.71 -7.97c-4.31,1.15 -8.3,2.88 -11.92,5.2l-8.41 -9.55c4.55,-2.47 9.46,-4.26 14.63,-5.38l5.7 9.73zm18.95 -1.49c-4.98,-0.42 -9.82,-0.27 -14.4,0.5l-4.79 -9.66c5.49,-0.67 11.17,-0.64 16.99,0.06l2.2 9.1zm18.34 4.16c-4.6,-1.68 -9.22,-2.86 -13.74,-3.59l-1.42 -8.83c5.26,1 10.53,2.53 15.82,4.6l-0.66 7.82zm18.39 9.34c-4.39,-2.91 -8.9,-5.37 -13.44,-7.36l1.34 -7.42c5.19,2.4 10.29,5.3 15.28,8.7l-3.18 6.08zm15.23 12.51c-0.85,-0.85 -1.7,-1.67 -2.59,-2.51 -2.79,-2.6 -5.68,-5 -8.63,-7.18l3.7 -5.66c3.28,2.47 6.51,5.17 9.61,8.07 1.06,0.99 2.09,1.99 3.1,3.01l-5.19 4.27zm4.18 4.52c3.37,3.92 6.23,7.94 8.63,12.04l7.19 -2.09c-2.87,-4.66 -6.21,-9.22 -10.05,-13.63l-5.77 3.68zm18.97 15.49c2.71,5.14 4.83,10.33 6.38,15.52l-9.12 -0.55c-1.12,-4.49 -2.77,-9.01 -4.97,-13.53l7.71 -1.44zm-1 32.34c0.23,-4.2 -0.03,-8.57 -0.82,-13.04l9.52 1.25c1.2,5.25 1.8,10.43 1.79,15.44l-10.49 -3.65zm-4.35 17.44c1.83,-3.76 3.11,-7.94 3.81,-12.38l10.73 4.67c-0.53,5.35 -1.79,10.42 -3.77,15.08l-10.77 -7.37zm-11.65 13.8c1.33,-0.93 2.58,-1.94 3.74,-3.02 2.04,-1.88 3.82,-3.99 5.38,-6.33l10.51 8.39c-1.8,3 -3.95,5.77 -6.45,8.26 -1.26,1.24 -2.59,2.41 -3.99,3.51l-9.19 -10.81zm-18.48 7.55c5.13,-0.96 9.87,-2.59 14.1,-4.85l8.45 11.61c-5.01,2.98 -10.67,5.18 -16.79,6.57l-5.76 -13.33zm-48.84 -9.82c6.24,3.77 12.71,6.51 19.16,8.29l-0.96 14.02c-8.08,-2 -16.16,-5.19 -24.03,-9.67l5.83 -12.64zm-21.62 -18.68c2.15,2.48 4.48,4.93 6.97,7.35 2.72,2.63 5.52,5 8.42,7.15l-7.55 11.79c-3.22,-2.25 -6.34,-4.71 -9.4,-7.43 -3.75,-3.33 -7.23,-6.88 -10.37,-10.53l11.93 -8.33zm-14.57 -22.45c2.49,5.74 5.9,11.45 10.22,17.12l-12.97 6.84c-5.08,-7 -9.06,-14.37 -11.9,-21.8l14.65 -2.16zm-18.93 -33.94c0.97,-5.73 2.81,-11.11 5.6,-16.09l13.05 7.43c-2.16,4.27 -3.54,8.69 -4.23,13.31l-14.42 -4.65zm56.41 -23.31c-3.48,0.33 -6.82,1.02 -9.98,2.07l6.66 9.76c2.35,-0.92 4.95,-1.6 7.72,-2l-4.4 -9.83zm8.8 9.45l-3.2 -9.66c3.58,0.06 7.23,0.47 10.94,1.23l0.99 9.04c-3.01,-0.5 -5.94,-0.69 -8.73,-0.61zm44.88 22.88c-1.86,-2.3 -3.95,-4.54 -6.37,-6.79l5.76 -5.17c2.9,2.68 5.46,5.47 7.72,8.36l-7.11 3.6zm10.16 24.67c-0.08,-2.41 -0.47,-4.97 -1.12,-7.5l8.84 0.22c0.86,3.08 1.44,6.18 1.73,9.19l-9.45 -1.91zm1.73 31.11c2.15,-2.62 3.9,-5.65 5.2,-8.97l-10.47 -6.54c-1.24,2.39 -2.85,4.55 -4.71,6.49l9.98 9.02zm-12.88 9.16c3.21,-1.28 6.13,-2.94 8.65,-4.96l-9.19 -10.17c-2.04,1.49 -4.32,2.67 -6.8,3.55l7.34 11.58zm-17.48 3.15c3.96,-0.02 7.75,-0.44 11.34,-1.26l-5.98 -12.19c-2.76,0.53 -5.66,0.71 -8.7,0.58l3.34 12.87zm-25.27 -19.17l-4.34 12.07c-4.5,-2.22 -8.86,-4.97 -12.95,-8.27l7.94 -9.97c3.04,2.42 6.16,4.46 9.35,6.17zm-29.13 -33.97c0.89,3.27 2.28,6.67 4.28,10.13l-12.93 3.14c-2.46,-4.54 -4.28,-9.13 -5.43,-13.71l14.08 0.44zm-14.6 -19.34c-0.86,3.84 -1.07,7.8 -0.69,11.88l14.28 2.21c-0.35,-3.12 -0.24,-6.12 0.25,-8.94 0,0 0,0 0,0l-13.84 -5.15zm19.42 -24.11c-3.13,1.49 -6.01,3.38 -8.59,5.69l10.1 8.8c0.21,-0.24 0.42,-0.46 0.64,-0.69 1.52,-1.62 3.4,-3.05 5.57,-4.24l-7.72 -9.56z"/>
+    <path class="fil1" d="M336.04 171.05l5.84 0 -17.16 40.68 -1.34 0 -17.43 -40.68 5.84 0 12.19 28.44 12.06 -28.44zm14.26 0l5.82 0 0 40.5 -5.82 0 0 -40.5zm28.79 23.5l-4.4 -2.68c-2.77,-1.69 -4.74,-3.35 -5.91,-4.99 -1.17,-1.63 -1.75,-3.52 -1.75,-5.65 0,-3.19 1.11,-5.79 3.32,-7.79 2.21,-1.99 5.09,-2.99 8.62,-2.99 3.39,0 6.5,0.95 9.32,2.86l0 6.6c-2.92,-2.82 -6.06,-4.23 -9.42,-4.23 -1.89,0 -3.45,0.44 -4.67,1.32 -1.21,0.88 -1.83,2 -1.83,3.36 0,1.22 0.45,2.36 1.35,3.42 0.9,1.05 2.34,2.17 4.33,3.34l4.43 2.63c4.94,2.95 7.41,6.73 7.41,11.29 0,3.26 -1.09,5.9 -3.26,7.94 -2.18,2.03 -5,3.05 -8.49,3.05 -4,0 -7.65,-1.24 -10.93,-3.71l0 -7.36c3.12,3.97 6.76,5.96 10.86,5.96 1.82,0 3.34,-0.51 4.55,-1.53 1.21,-1.02 1.81,-2.28 1.81,-3.82 0,-2.47 -1.78,-4.82 -5.34,-7.02zm21.18 -23.5l5.82 0 0 40.5 -5.82 0 0 -40.5zm38.63 -0.6c6.26,0 11.46,1.98 15.62,5.95 4.17,3.96 6.24,8.94 6.24,14.91 0,5.98 -2.09,10.93 -6.29,14.84 -4.21,3.92 -9.5,5.88 -15.89,5.88 -6.1,0 -11.18,-1.96 -15.25,-5.88 -4.07,-3.91 -6.1,-8.82 -6.1,-14.72 0,-6.06 2.05,-11.07 6.14,-15.03 4.1,-3.97 9.27,-5.95 15.53,-5.95zm0.22 5.53c-4.63,0 -8.44,1.44 -11.41,4.34 -2.98,2.9 -4.48,6.6 -4.48,11.11 0,4.37 1.5,8.01 4.49,10.91 2.98,2.9 6.73,4.34 11.22,4.34 4.51,0 8.28,-1.47 11.3,-4.43 3.02,-2.96 4.53,-6.64 4.53,-11.05 0,-4.3 -1.51,-7.9 -4.53,-10.83 -3.02,-2.93 -6.73,-4.39 -11.12,-4.39zm64.93 -4.93l5.52 0 0 40.5 -4.99 0 -27.08 -31.19 0 31.19 -5.46 0 0 -40.5 4.71 0 27.3 31.45 0 -31.45z"/>
+    <path class="fil2" d="M540.97 187.97l0.35 0c2.54,0 4.47,-0.52 5.8,-1.56 1.32,-1.05 1.99,-2.56 1.99,-4.55 0,-1.8 -0.64,-3.26 -1.93,-4.38 -1.29,-1.12 -2.97,-1.68 -5.06,-1.68 -2.12,0 -4.45,0.65 -7.03,1.96l0 -5.54c2.36,-1.17 4.93,-1.77 7.71,-1.77 3.73,0 6.68,0.98 8.83,2.93 2.16,1.96 3.24,4.64 3.24,8.02 0,2.05 -0.42,3.78 -1.25,5.19 -0.83,1.4 -2.16,2.6 -3.98,3.61 1.6,0.61 2.75,1.38 3.5,2.28 0.73,0.9 1.3,1.98 1.71,3.25 0.4,1.28 0.61,2.64 0.61,4.06 0,3.55 -1.18,6.46 -3.54,8.77 -2.36,2.31 -5.34,3.47 -8.93,3.47 -3.08,0 -6.05,-0.75 -8.91,-2.24l0 -6.32c3.05,1.9 6.02,2.85 8.89,2.85 1.95,0 3.53,-0.58 4.71,-1.74 1.19,-1.16 1.79,-2.69 1.79,-4.6 0,-1.6 -0.5,-3 -1.48,-4.2 -0.58,-0.68 -1.23,-1.17 -1.93,-1.49 -0.7,-0.32 -2.23,-0.63 -4.56,-0.91l-0.53 -0.06 0 -5.35zm41.21 -17.11l0.57 -0.41 3.52 4.4c-3.1,2 -5.66,4.19 -7.7,6.55 -2.04,2.37 -3.62,5.15 -4.72,8.36 2.14,-1.11 4.28,-1.67 6.41,-1.67 3.2,0 5.89,1.14 8.08,3.41 2.18,2.26 3.27,5.04 3.27,8.34 0,3.4 -1.19,6.28 -3.56,8.64 -2.39,2.37 -5.28,3.55 -8.68,3.55 -3.8,0 -6.89,-1.35 -9.24,-4.03 -2.34,-2.68 -3.52,-6.19 -3.52,-10.52 0,-3.26 0.6,-6.5 1.81,-9.72 1.21,-3.23 2.95,-6.25 5.22,-9.07 2.27,-2.82 5.11,-5.43 8.54,-7.83zm-9.58 24.89c-0.15,0.92 -0.23,1.94 -0.23,3.06 0,2.3 0.66,4.18 1.99,5.65 1.32,1.48 3.02,2.22 5.09,2.22 1.85,0 3.38,-0.63 4.59,-1.89 1.21,-1.27 1.81,-2.85 1.81,-4.77 0,-1.96 -0.64,-3.55 -1.93,-4.76 -1.29,-1.22 -2.98,-1.82 -5.09,-1.82 -1.08,0 -2.06,0.17 -2.94,0.49 -0.88,0.33 -1.98,0.93 -3.29,1.82zm40.08 -25.3c3.7,0 6.77,1.95 9.19,5.85 2.43,3.91 3.63,8.86 3.63,14.87 0,6.16 -1.2,11.17 -3.63,15.02 -2.42,3.85 -5.57,5.78 -9.43,5.78 -3.92,0 -7.07,-1.89 -9.44,-5.67 -2.38,-3.78 -3.57,-8.79 -3.57,-15.02 0,-6.16 1.23,-11.17 3.68,-15.03 2.45,-3.87 5.64,-5.8 9.57,-5.8zm0.05 5.53l-0.29 0c-2.23,0 -3.99,1.36 -5.29,4.1 -1.3,2.75 -1.96,6.46 -1.96,11.15 0,4.8 0.64,8.56 1.91,11.29 1.28,2.74 3.04,4.1 5.28,4.1 2.24,0 4.01,-1.36 5.3,-4.1 1.3,-2.73 1.95,-6.43 1.95,-11.12 0,-4.7 -0.63,-8.45 -1.88,-11.24 -1.24,-2.79 -2.92,-4.18 -5.02,-4.18z"/>
+    <path class="fil2" d="M620.84 163.89c0,-1.21 0.44,-2.25 1.31,-3.12 0.87,-0.86 1.92,-1.3 3.14,-1.3 1.21,0 2.25,0.44 3.11,1.3 0.87,0.87 1.29,1.91 1.29,3.12 0,1.22 -0.42,2.27 -1.29,3.13 -0.86,0.87 -1.9,1.31 -3.11,1.31 -1.22,0 -2.27,-0.44 -3.14,-1.31 -0.87,-0.86 -1.31,-1.91 -1.31,-3.13zm1.74 -0.01c0,0.75 0.26,1.39 0.79,1.92 0.54,0.53 1.18,0.79 1.92,0.79 0.74,0 1.37,-0.26 1.89,-0.79 0.52,-0.53 0.78,-1.17 0.78,-1.92 0,-0.74 -0.25,-1.37 -0.77,-1.89 -0.52,-0.52 -1.15,-0.79 -1.9,-0.79 -0.76,0 -1.4,0.27 -1.93,0.79 -0.52,0.52 -0.78,1.15 -0.78,1.89z"/>
+    <path class="fil1" d="M640.59 148.46c1.1,0 2.18,0.28 3.23,0.85 1.05,0.56 1.87,1.37 2.45,2.43 0.59,1.05 0.88,2.15 0.88,3.29 0,1.13 -0.29,2.22 -0.87,3.26 -0.57,1.05 -1.38,1.86 -2.42,2.43 -1.04,0.58 -2.13,0.87 -3.27,0.87 -1.13,0 -2.22,-0.29 -3.27,-0.87 -1.04,-0.57 -1.85,-1.38 -2.43,-2.43 -0.58,-1.04 -0.87,-2.13 -0.87,-3.26 0,-1.14 0.3,-2.24 0.88,-3.29 0.59,-1.06 1.41,-1.87 2.46,-2.43 1.05,-0.57 2.13,-0.85 3.23,-0.85zm0 1.09c-0.92,0 -1.82,0.24 -2.69,0.71 -0.88,0.47 -1.56,1.15 -2.05,2.03 -0.5,0.87 -0.74,1.79 -0.74,2.74 0,0.95 0.24,1.85 0.73,2.72 0.48,0.87 1.16,1.54 2.03,2.03 0.87,0.48 1.78,0.72 2.72,0.72 0.95,0 1.86,-0.24 2.73,-0.72 0.87,-0.49 1.54,-1.16 2.02,-2.03 0.48,-0.87 0.73,-1.77 0.73,-2.72 0,-0.95 -0.25,-1.87 -0.74,-2.74 -0.49,-0.88 -1.17,-1.56 -2.05,-2.03 -0.88,-0.47 -1.77,-0.71 -2.69,-0.71zm-2.88 9.1l0 -7.05 2.43 0c0.83,0 1.43,0.06 1.8,0.19 0.37,0.13 0.67,0.36 0.89,0.69 0.22,0.32 0.33,0.66 0.33,1.03 0,0.51 -0.18,0.96 -0.55,1.34 -0.37,0.39 -0.86,0.6 -1.47,0.65 0.25,0.1 0.45,0.23 0.6,0.37 0.28,0.28 0.63,0.74 1.04,1.4l0.86 1.38 -1.38 0 -0.63 -1.11c-0.49,-0.87 -0.89,-1.42 -1.2,-1.64 -0.21,-0.16 -0.51,-0.24 -0.91,-0.24l-0.67 0 0 2.99 -1.14 0zm1.14 -3.97l1.38 0c0.67,0 1.12,-0.1 1.36,-0.3 0.24,-0.19 0.36,-0.45 0.36,-0.77 0,-0.21 -0.06,-0.4 -0.18,-0.56 -0.11,-0.17 -0.27,-0.29 -0.48,-0.37 -0.2,-0.08 -0.58,-0.12 -1.14,-0.12l-1.3 0 0 2.12z"/>
+   </g>
+   <g>
+    <g>
+     <polygon class="fil1" points="301.8,270.49 301.8,273.31 294.01,273.31 294.01,292.83 290.8,292.83 290.8,273.31 283.14,273.31 283.14,270.49 "/>
+     <path id="_1" class="fil1" d="M316.7 288.54l0 2.84c-1.79,1.16 -3.71,1.74 -5.76,1.74 -2.05,0 -3.74,-0.69 -5.08,-2.06 -1.46,-1.51 -2.19,-3.4 -2.19,-5.67 0,-2.27 0.64,-4.1 1.93,-5.48 1.29,-1.39 2.94,-2.08 4.95,-2.08 1.68,0 3.08,0.53 4.19,1.6 1.11,1.07 1.8,2.44 2.06,4.1 0.11,0.65 0.17,1.38 0.17,2.19l-10.35 0c0.06,1.24 0.5,2.32 1.31,3.24 0.81,0.92 1.95,1.38 3.44,1.38 1.92,0 3.7,-0.6 5.33,-1.8zm-10.02 -4.56l7.4 0c-0.02,-0.28 -0.06,-0.56 -0.13,-0.85 -0.06,-0.28 -0.2,-0.66 -0.41,-1.14 -0.2,-0.48 -0.57,-0.88 -1.09,-1.18 -0.53,-0.31 -1.17,-0.46 -1.94,-0.46 -1.13,0 -2.07,0.41 -2.81,1.24 -0.52,0.57 -0.86,1.37 -1.02,2.39z"/>
+     <path id="_2" class="fil1" d="M330.82 278.84l0 3.11c-1.47,-0.93 -2.83,-1.4 -4.1,-1.4 -1.42,0 -2.52,0.49 -3.3,1.49 -0.79,0.99 -1.18,2.13 -1.18,3.42 0,1.37 0.42,2.53 1.26,3.48 0.84,0.95 2.1,1.43 3.78,1.43 1.14,0 2.42,-0.33 3.86,-0.98l0 2.88c-1.61,0.57 -3.04,0.85 -4.29,0.85 -2.42,0 -4.28,-0.73 -5.6,-2.18 -1.3,-1.45 -1.96,-3.24 -1.96,-5.38 0,-0.94 0.14,-1.85 0.41,-2.72 0.27,-0.88 0.69,-1.7 1.24,-2.47 0.56,-0.78 1.32,-1.4 2.3,-1.85 0.97,-0.46 2.08,-0.69 3.32,-0.69 1.27,0 2.69,0.34 4.26,1.01z"/>
+     <path id="_3" class="fil1" d="M337.27 270.49l0 9.56c1.24,-1.48 2.75,-2.22 4.52,-2.22 1.04,0 1.96,0.26 2.73,0.8 0.78,0.53 1.33,1.2 1.65,1.98 0.38,0.94 0.56,2.22 0.56,3.83l0 8.39 -2.91 0 0 -9.11c0,-0.92 -0.18,-1.67 -0.53,-2.26 -0.54,-0.89 -1.32,-1.34 -2.32,-1.34 -1.2,0 -2.44,0.72 -3.7,2.16l0 10.55 -2.92 0 0 -22.34 2.92 0z"/>
+     <polygon class="fil1" points="623.95,270.41 623.95,289.83 634,289.83 634,292.74 620.7,292.74 620.7,270.41 "/>
+     <path id="_1_0" class="fil1" d="M636.68 272.38c0.33,-0.35 0.73,-0.53 1.21,-0.53 0.48,0 0.89,0.17 1.23,0.51 0.34,0.34 0.51,0.74 0.51,1.19 0,0.46 -0.17,0.87 -0.51,1.22 -0.34,0.35 -0.75,0.52 -1.23,0.52 -0.52,0 -0.93,-0.19 -1.24,-0.56 -0.31,-0.37 -0.46,-0.76 -0.46,-1.18 0,-0.43 0.17,-0.83 0.49,-1.17zm2.69 5.66l0 14.7 -2.92 0 0 -14.7 2.92 0z"/>
+     <path id="_2_1" class="fil1" d="M655.28 278.04l0 2.26 -3.01 0c1.03,1.03 1.54,2.1 1.54,3.21 0,0.57 -0.14,1.17 -0.41,1.8 -0.27,0.63 -0.6,1.13 -0.97,1.51 -0.54,0.59 -1.33,0.99 -2.35,1.22 -1.03,0.23 -1.89,0.43 -2.57,0.59 -0.69,0.17 -1.04,0.49 -1.04,0.97 0,0.39 0.36,0.73 1.07,1.01 0.71,0.29 1.85,0.58 3.42,0.89 2.84,0.57 4.26,1.93 4.26,4.09 0,1.46 -0.61,2.61 -1.84,3.44 -1.22,0.83 -2.92,1.24 -5.11,1.24 -1.98,0 -3.61,-0.42 -4.87,-1.26 -1.27,-0.84 -1.9,-1.9 -1.9,-3.19 0,-1.09 0.3,-1.96 0.9,-2.62 0.6,-0.65 1.53,-1.13 2.8,-1.44 -0.99,-0.61 -1.48,-1.23 -1.48,-1.87 0,-0.48 0.22,-0.9 0.64,-1.27 0.43,-0.37 0.99,-0.65 1.69,-0.82l0 -0.07c-1.07,-0.46 -1.89,-1.08 -2.46,-1.86 -0.52,-0.75 -0.78,-1.66 -0.78,-2.75 0,-1.58 0.57,-2.81 1.72,-3.72 1.14,-0.91 2.71,-1.36 4.69,-1.36l6.06 0zm-4.09 5.11c0,-0.7 -0.28,-1.31 -0.85,-1.82 -0.57,-0.51 -1.24,-0.77 -2,-0.77 -0.81,0 -1.49,0.26 -2.06,0.79 -0.57,0.52 -0.85,1.14 -0.85,1.86 0,0.81 0.27,1.46 0.81,1.95 0.55,0.49 1.26,0.74 2.13,0.74 0.83,0 1.51,-0.26 2.03,-0.77 0.53,-0.51 0.79,-1.17 0.79,-1.98zm1.21 12.67c0,-0.57 -0.29,-1.04 -0.87,-1.42 -0.58,-0.39 -1.2,-0.64 -1.88,-0.76 -0.68,-0.12 -1.36,-0.18 -2.06,-0.18 -0.99,0 -1.79,0.21 -2.41,0.63 -0.62,0.41 -0.93,0.95 -0.93,1.6 0,1.51 1.36,2.26 4.09,2.26 1.29,0 2.29,-0.19 3,-0.56 0.71,-0.37 1.06,-0.89 1.06,-1.57z"/>
+     <path id="_3_2" class="fil1" d="M660.39 270.41l0 9.56c1.24,-1.48 2.75,-2.22 4.52,-2.22 1.05,0 1.96,0.26 2.73,0.8 0.78,0.53 1.33,1.19 1.66,1.98 0.37,0.94 0.55,2.21 0.55,3.83l0 8.38 -2.91 0 0 -9.1c0,-0.92 -0.17,-1.67 -0.52,-2.26 -0.55,-0.89 -1.32,-1.34 -2.33,-1.34 -1.2,0 -2.43,0.72 -3.7,2.16l0 10.54 -2.91 0 0 -22.33 2.91 0z"/>
+     <path id="_4" class="fil1" d="M677.32 274.99l0 3.05 4.65 0 0 2.62 -4.65 0 0 6.42c0.02,0.94 0.06,1.55 0.11,1.85 0.06,0.29 0.2,0.57 0.41,0.83 0.4,0.42 0.92,0.63 1.58,0.63 1.07,0 2.17,-0.35 3.3,-1.05l0 2.72c-1.2,0.65 -2.45,0.98 -3.76,0.98 -0.64,0 -1.32,-0.15 -2.05,-0.44 -0.73,-0.3 -1.33,-0.77 -1.78,-1.43 -0.48,-0.72 -0.72,-2.05 -0.72,-3.99l0 -6.52 -2.56 0 0 -0.29 5.47 -5.38z"/>
+     <path class="fil1" d="M181.03 272.02l0 3.63c-1.62,-1.55 -3.36,-2.32 -5.24,-2.32 -1.07,0 -1.93,0.25 -2.57,0.75 -0.64,0.5 -0.97,1.11 -0.97,1.83 0,0.9 0.35,1.64 1.04,2.23 0.68,0.59 2.19,1.57 4.53,2.95 1.22,0.72 2.18,1.55 2.88,2.48 0.81,1.05 1.21,2.29 1.21,3.71 0,1.76 -0.59,3.22 -1.76,4.37 -1.18,1.14 -2.76,1.72 -4.72,1.72 -2.21,0 -4.21,-0.69 -6.02,-2.07l0 -4.06c1.74,2.19 3.75,3.28 6.02,3.28 0.89,0 1.7,-0.27 2.41,-0.81 0.71,-0.53 1.06,-1.24 1.06,-2.14 0,-1.42 -0.98,-2.71 -2.95,-3.86 -1.92,-1.16 -3.21,-1.97 -3.86,-2.43 -0.65,-0.46 -1.21,-0.98 -1.67,-1.57 -0.74,-0.96 -1.11,-2.07 -1.11,-3.34 0,-1.72 0.6,-3.14 1.8,-4.26 1.2,-1.11 2.79,-1.67 4.78,-1.67 1.83,0 3.55,0.53 5.14,1.58z"/>
+     <path id="_1_3" class="fil1" d="M188.43 275.32l0 3.05 4.65 0 0 2.62 -4.65 0 0 6.42c0.02,0.94 0.06,1.55 0.11,1.85 0.06,0.29 0.2,0.57 0.41,0.83 0.4,0.42 0.92,0.62 1.58,0.62 1.07,0 2.17,-0.35 3.3,-1.04l0 2.71c-1.2,0.66 -2.45,0.99 -3.76,0.99 -0.64,0 -1.32,-0.15 -2.05,-0.45 -0.73,-0.29 -1.33,-0.77 -1.78,-1.42 -0.48,-0.72 -0.72,-2.05 -0.72,-4l0 -6.51 -2.56 0 0 -0.3 5.47 -5.37z"/>
+     <path id="_2_4" class="fil1" d="M208.67 293.07l-2.95 0 0 -1.87c-1.31,1.45 -2.79,2.17 -4.45,2.17 -0.68,0 -1.41,-0.17 -2.2,-0.51 -0.78,-0.34 -1.44,-0.96 -1.96,-1.85 -0.55,-0.85 -0.82,-2.27 -0.82,-4.26l0 -8.38 2.95 0 0 8.38c0,0.46 0,0.83 0.01,1.1 0.01,0.27 0.07,0.63 0.18,1.08 0.11,0.45 0.26,0.8 0.45,1.05 0.18,0.25 0.48,0.47 0.88,0.67 0.4,0.19 0.89,0.29 1.46,0.29 1.35,0 2.52,-0.69 3.5,-2.06l0 -10.51 2.95 0 0 14.7z"/>
+     <path id="_3_5" class="fil1" d="M225.5 270.74l0 22.33 -6.22 0c-1.36,0 -2.53,-0.26 -3.52,-0.77 -1,-0.51 -1.74,-1.18 -2.23,-2 -0.49,-0.81 -0.85,-1.62 -1.06,-2.42 -0.22,-0.8 -0.33,-1.6 -0.33,-2.41 0,-2.27 0.71,-4.07 2.14,-5.4 1.43,-1.33 3.13,-2 5.1,-2 1.11,0 2.17,0.2 3.17,0.59l0 -7.92 2.95 0zm-2.95 19.88l0 -9.37c-0.87,-0.46 -1.78,-0.69 -2.72,-0.69 -1.33,0 -2.45,0.44 -3.37,1.33 -0.92,0.88 -1.37,2.2 -1.37,3.94 0,2.17 0.72,3.61 2.16,4.33 0.61,0.3 1.63,0.46 3.07,0.46l2.23 0z"/>
+     <path id="_4_6" class="fil1" d="M229.76 272.7c0.32,-0.35 0.73,-0.52 1.21,-0.52 0.48,0 0.89,0.17 1.22,0.51 0.34,0.34 0.51,0.73 0.51,1.19 0,0.46 -0.17,0.86 -0.51,1.21 -0.33,0.35 -0.74,0.53 -1.22,0.53 -0.53,0 -0.94,-0.19 -1.25,-0.56 -0.3,-0.37 -0.46,-0.76 -0.46,-1.18 0,-0.43 0.17,-0.83 0.5,-1.18zm2.68 5.67l0 14.7 -2.91 0 0 -14.7 2.91 0z"/>
+     <path id="_5" class="fil1" d="M243.67 278.07c2.23,0 4.08,0.71 5.57,2.13 1.48,1.42 2.23,3.28 2.23,5.57 0,2.42 -0.81,4.29 -2.41,5.61 -1.61,1.33 -3.43,1.99 -5.49,1.99 -2.31,0 -4.19,-0.75 -5.64,-2.23 -1.46,-1.49 -2.18,-3.3 -2.18,-5.44 0,-2.14 0.72,-3.94 2.18,-5.42 1.45,-1.47 3.36,-2.21 5.74,-2.21zm-0.16 2.62c-1.38,0 -2.52,0.45 -3.42,1.35 -0.91,0.89 -1.36,2.12 -1.36,3.7 0,1.68 0.5,2.93 1.5,3.76 1.01,0.83 2.14,1.25 3.41,1.25 1.44,0 2.61,-0.47 3.5,-1.41 0.9,-0.94 1.35,-2.15 1.35,-3.64 0,-1.68 -0.52,-2.93 -1.54,-3.76 -1.03,-0.83 -2.18,-1.25 -3.44,-1.25z"/>
+     <rect class="fil3" x="264.87" y="259.86" width="2.37" height="44.01"/>
+     <rect class="fil3" x="355.47" y="259.86" width="2.37" height="44.01"/>
+     <rect class="fil3" x="461.28" y="259.86" width="2.37" height="44.01"/>
+     <rect class="fil3" x="601.87" y="259.86" width="2.37" height="44.01"/>
+     <polygon class="fil1" points="500.7,270.65 500.7,292.99 497.49,292.99 497.49,275.6 490.61,284.24 490.02,284.24 483.08,275.6 483.08,292.99 479.87,292.99 479.87,270.65 482.88,270.65 490.32,279.82 497.72,270.65 "/>
+     <path id="_1_7" class="fil1" d="M517.4 288.7l0 2.84c-1.79,1.16 -3.71,1.74 -5.77,1.74 -2.05,0 -3.74,-0.69 -5.07,-2.06 -1.46,-1.51 -2.2,-3.4 -2.2,-5.67 0,-2.27 0.65,-4.1 1.94,-5.48 1.28,-1.39 2.93,-2.08 4.94,-2.08 1.68,0 3.08,0.53 4.19,1.6 1.12,1.07 1.8,2.44 2.07,4.1 0.1,0.65 0.16,1.38 0.16,2.19l-10.35 0c0.07,1.24 0.5,2.33 1.31,3.24 0.81,0.92 1.95,1.38 3.44,1.38 1.92,0 3.7,-0.6 5.34,-1.8zm-10.02 -4.56l7.4 0c-0.02,-0.28 -0.07,-0.56 -0.13,-0.85 -0.07,-0.28 -0.21,-0.66 -0.41,-1.14 -0.21,-0.48 -0.58,-0.88 -1.1,-1.18 -0.52,-0.31 -1.17,-0.46 -1.93,-0.46 -1.14,0 -2.08,0.41 -2.82,1.24 -0.52,0.57 -0.86,1.37 -1.01,2.39z"/>
+     <path id="_2_8" class="fil1" d="M532.33 290.37l0 1.76c-1.16,0.77 -2.1,1.15 -2.82,1.15 -1.24,0 -1.98,-0.5 -2.22,-1.51 -1.27,1.01 -2.59,1.51 -3.97,1.51 -1.05,0 -1.91,-0.35 -2.58,-1.06 -0.68,-0.71 -1.02,-1.56 -1.02,-2.54 0,-0.57 0.11,-1.08 0.33,-1.54 0.22,-0.46 0.45,-0.82 0.7,-1.1 0.25,-0.27 0.66,-0.55 1.23,-0.85 0.57,-0.29 1,-0.5 1.29,-0.62 0.3,-0.12 0.78,-0.3 1.46,-0.54l2.59 -0.92 0 -0.78c0,-1.73 -0.89,-2.59 -2.65,-2.59 -1.75,0 -3.3,0.81 -4.65,2.42l0 -3.17c1.13,-1.34 2.76,-2 4.87,-2 1.58,0 2.86,0.41 3.85,1.23 1,0.81 1.49,2.02 1.49,3.61l0 7.57c0,0.5 0.19,0.75 0.56,0.75 0.33,0 0.84,-0.26 1.54,-0.78zm-5.01 -0.36l0 -4.29c-1.55,0.52 -2.71,1.03 -3.49,1.52 -0.77,0.49 -1.16,1.13 -1.16,1.91 0,0.62 0.19,1.11 0.59,1.49 0.39,0.39 0.89,0.58 1.5,0.58 0.86,0 1.71,-0.41 2.56,-1.21z"/>
+     <path id="_3_9" class="fil1" d="M543.3 279.2l0 2.88c-1.68,-1.05 -3.1,-1.57 -4.26,-1.57 -0.63,0 -1.1,0.14 -1.41,0.41 -0.3,0.27 -0.46,0.57 -0.46,0.9 0,0.41 0.2,0.78 0.59,1.1 0.4,0.31 1.16,0.79 2.3,1.42 0.13,0.07 0.23,0.12 0.29,0.17 2.45,1.33 3.67,2.87 3.67,4.61 0,0.39 -0.08,0.81 -0.25,1.25 -0.16,0.43 -0.42,0.88 -0.77,1.34 -0.35,0.46 -0.87,0.83 -1.57,1.13 -0.7,0.29 -1.52,0.44 -2.45,0.44 -1.45,0 -3.08,-0.45 -4.92,-1.34l0 -3.15c1.88,1.29 3.44,1.94 4.69,1.94 0.52,0 1.02,-0.14 1.5,-0.41 0.48,-0.28 0.72,-0.64 0.72,-1.1 0,-0.48 -0.17,-0.87 -0.5,-1.16 -0.34,-0.3 -0.93,-0.67 -1.76,-1.13 -1.5,-0.83 -2.64,-1.61 -3.4,-2.34 -0.77,-0.73 -1.15,-1.66 -1.15,-2.77 0,-1.09 0.43,-2 1.3,-2.73 0.86,-0.74 1.99,-1.1 3.38,-1.1 1.42,0 2.91,0.4 4.46,1.21z"/>
+     <path id="_4_10" class="fil1" d="M559.67 292.99l-2.95 0 0 -1.87c-1.31,1.44 -2.79,2.16 -4.45,2.16 -0.68,0 -1.41,-0.17 -2.19,-0.51 -0.79,-0.34 -1.45,-0.95 -1.97,-1.85 -0.54,-0.85 -0.82,-2.27 -0.82,-4.25l0 -8.39 2.95 0 0 8.39c0,0.45 0,0.82 0.02,1.09 0.01,0.28 0.07,0.64 0.18,1.08 0.11,0.45 0.25,0.8 0.44,1.05 0.18,0.25 0.48,0.48 0.88,0.67 0.41,0.2 0.89,0.3 1.46,0.3 1.35,0 2.52,-0.69 3.5,-2.07l0 -10.51 2.95 0 0 14.71z"/>
+     <path id="_5_11" class="fil1" d="M563.63 278.28l2.92 0 0 3.38c0.35,-0.55 0.62,-0.96 0.83,-1.25 0.21,-0.28 0.51,-0.65 0.92,-1.1 0.4,-0.44 0.82,-0.78 1.26,-0.99 0.44,-0.22 0.89,-0.33 1.37,-0.33 1.14,0 2.29,0.55 3.44,1.67l-1.54 2.55c-0.3,-0.3 -0.72,-0.62 -1.26,-0.95 -0.53,-0.32 -1.05,-0.49 -1.55,-0.49 -0.74,0 -1.51,0.38 -2.29,1.15 -0.79,0.76 -1.18,1.89 -1.18,3.37l0 7.7 -2.92 0 0 -14.71z"/>
+     <path id="_6" class="fil1" d="M588.68 288.7l0 2.84c-1.79,1.16 -3.71,1.74 -5.76,1.74 -2.05,0 -3.74,-0.69 -5.08,-2.06 -1.46,-1.51 -2.19,-3.4 -2.19,-5.67 0,-2.27 0.64,-4.1 1.93,-5.48 1.29,-1.39 2.94,-2.08 4.95,-2.08 1.68,0 3.08,0.53 4.19,1.6 1.11,1.07 1.8,2.44 2.06,4.1 0.11,0.65 0.17,1.38 0.17,2.19l-10.35 0c0.06,1.24 0.5,2.33 1.31,3.24 0.81,0.92 1.95,1.38 3.44,1.38 1.92,0 3.7,-0.6 5.33,-1.8zm-10.02 -4.56l7.4 0c-0.02,-0.28 -0.06,-0.56 -0.13,-0.85 -0.06,-0.28 -0.2,-0.66 -0.41,-1.14 -0.2,-0.48 -0.57,-0.88 -1.09,-1.18 -0.53,-0.31 -1.17,-0.46 -1.94,-0.46 -1.13,0 -2.07,0.41 -2.81,1.24 -0.53,0.57 -0.86,1.37 -1.02,2.39z"/>
+     <polygon class="fil1" points="394.82,270.57 394.82,292.91 391.61,292.91 391.61,275.52 384.73,284.16 384.14,284.16 377.2,275.52 377.2,292.91 373.99,292.91 373.99,270.57 377,270.57 384.44,279.74 391.84,270.57 "/>
+     <path id="_1_12" class="fil1" d="M399.53 272.54c0.33,-0.35 0.73,-0.53 1.21,-0.53 0.48,0 0.89,0.17 1.23,0.51 0.34,0.34 0.51,0.74 0.51,1.2 0,0.46 -0.17,0.86 -0.51,1.21 -0.34,0.35 -0.75,0.52 -1.23,0.52 -0.52,0 -0.94,-0.18 -1.24,-0.55 -0.31,-0.38 -0.46,-0.77 -0.46,-1.18 0,-0.44 0.16,-0.83 0.49,-1.18zm2.69 5.66l0 14.71 -2.92 0 0 -14.71 2.92 0z"/>
+     <path id="_2_13" class="fil1" d="M417.12 278.92l0 3.11c-1.47,-0.93 -2.83,-1.4 -4.1,-1.4 -1.42,0 -2.52,0.49 -3.31,1.49 -0.78,0.99 -1.17,2.13 -1.17,3.42 0,1.37 0.42,2.54 1.26,3.48 0.84,0.95 2.1,1.43 3.78,1.43 1.13,0 2.42,-0.33 3.86,-0.98l0 2.88c-1.61,0.57 -3.04,0.85 -4.29,0.85 -2.42,0 -4.29,-0.73 -5.6,-2.18 -1.31,-1.45 -1.96,-3.24 -1.96,-5.38 0,-0.94 0.14,-1.85 0.41,-2.72 0.27,-0.87 0.69,-1.7 1.24,-2.47 0.56,-0.78 1.32,-1.4 2.29,-1.85 0.98,-0.46 2.08,-0.69 3.33,-0.69 1.26,0 2.68,0.34 4.26,1.01z"/>
+     <path id="_3_14" class="fil1" d="M420.59 278.2l2.91 0 0 3.38c0.35,-0.55 0.63,-0.97 0.84,-1.25 0.2,-0.28 0.51,-0.65 0.91,-1.1 0.41,-0.44 0.83,-0.78 1.26,-0.99 0.44,-0.22 0.9,-0.33 1.38,-0.33 1.13,0 2.28,0.55 3.44,1.67l-1.54 2.55c-0.31,-0.3 -0.73,-0.62 -1.26,-0.95 -0.54,-0.32 -1.06,-0.49 -1.56,-0.49 -0.74,0 -1.51,0.38 -2.29,1.15 -0.79,0.76 -1.18,1.89 -1.18,3.37l0 7.7 -2.91 0 0 -14.71z"/>
+     <path id="_4_15" class="fil1" d="M440.4 277.91c2.22,0 4.08,0.71 5.56,2.13 1.49,1.42 2.23,3.27 2.23,5.56 0,2.43 -0.8,4.3 -2.41,5.62 -1.6,1.32 -3.43,1.98 -5.48,1.98 -2.31,0 -4.2,-0.74 -5.65,-2.23 -1.45,-1.48 -2.18,-3.29 -2.18,-5.43 0,-2.14 0.73,-3.95 2.18,-5.42 1.45,-1.48 3.37,-2.21 5.75,-2.21zm-0.17 2.62c-1.37,0 -2.51,0.45 -3.42,1.34 -0.9,0.9 -1.36,2.13 -1.36,3.7 0,1.68 0.5,2.94 1.51,3.77 1,0.83 2.14,1.24 3.4,1.24 1.45,0 2.61,-0.47 3.51,-1.41 0.89,-0.94 1.34,-2.15 1.34,-3.63 0,-1.68 -0.51,-2.94 -1.54,-3.77 -1.02,-0.83 -2.17,-1.24 -3.44,-1.24z"/>
+     <polygon class="fil1" points="77.77,270.74 68.34,293.2 67.62,293.2 57.99,270.74 61.2,270.74 67.91,286.42 74.59,270.74 "/>
+     <path id="_1_16" class="fil1" d="M80.13 272.7c0.33,-0.35 0.73,-0.52 1.21,-0.52 0.48,0 0.89,0.17 1.23,0.51 0.34,0.34 0.51,0.73 0.51,1.19 0,0.46 -0.17,0.86 -0.51,1.21 -0.34,0.35 -0.75,0.53 -1.23,0.53 -0.52,0 -0.94,-0.19 -1.24,-0.56 -0.31,-0.37 -0.46,-0.76 -0.46,-1.18 0,-0.43 0.16,-0.83 0.49,-1.18zm2.68 5.67l0 14.7 -2.91 0 0 -14.7 2.91 0z"/>
+     <path id="_2_17" class="fil1" d="M95.52 279.28l0 2.89c-1.68,-1.05 -3.1,-1.57 -4.26,-1.57 -0.63,0 -1.1,0.13 -1.41,0.4 -0.3,0.28 -0.45,0.58 -0.45,0.9 0,0.42 0.19,0.79 0.59,1.1 0.39,0.32 1.15,0.79 2.29,1.43 0.13,0.06 0.23,0.12 0.29,0.16 2.45,1.33 3.67,2.87 3.67,4.62 0,0.39 -0.08,0.81 -0.25,1.24 -0.16,0.44 -0.42,0.89 -0.77,1.34 -0.35,0.46 -0.87,0.84 -1.57,1.13 -0.7,0.3 -1.51,0.45 -2.45,0.45 -1.44,0 -3.08,-0.45 -4.91,-1.35l0 -3.14c1.87,1.29 3.43,1.93 4.68,1.93 0.52,0 1.02,-0.13 1.5,-0.41 0.48,-0.27 0.72,-0.64 0.72,-1.09 0,-0.48 -0.16,-0.87 -0.5,-1.17 -0.34,-0.29 -0.93,-0.67 -1.76,-1.13 -1.5,-0.83 -2.64,-1.61 -3.4,-2.34 -0.76,-0.73 -1.15,-1.65 -1.15,-2.77 0,-1.09 0.43,-2 1.3,-2.73 0.86,-0.73 1.99,-1.1 3.39,-1.1 1.41,0 2.9,0.41 4.45,1.21z"/>
+     <path id="_3_18" class="fil1" d="M99.91 272.7c0.32,-0.35 0.73,-0.52 1.21,-0.52 0.48,0 0.89,0.17 1.23,0.51 0.33,0.34 0.5,0.73 0.5,1.19 0,0.46 -0.17,0.86 -0.5,1.21 -0.34,0.35 -0.75,0.53 -1.23,0.53 -0.53,0 -0.94,-0.19 -1.25,-0.56 -0.3,-0.37 -0.45,-0.76 -0.45,-1.18 0,-0.43 0.16,-0.83 0.49,-1.18zm2.68 5.67l0 14.7 -2.91 0 0 -14.7 2.91 0z"/>
+     <path id="_4_19" class="fil1" d="M113.82 278.07c2.23,0 4.09,0.71 5.57,2.13 1.48,1.42 2.23,3.28 2.23,5.57 0,2.42 -0.81,4.29 -2.41,5.61 -1.6,1.33 -3.43,1.99 -5.48,1.99 -2.32,0 -4.2,-0.75 -5.65,-2.23 -1.45,-1.49 -2.18,-3.3 -2.18,-5.44 0,-2.14 0.73,-3.94 2.18,-5.42 1.45,-1.47 3.36,-2.21 5.74,-2.21zm-0.16 2.62c-1.37,0 -2.52,0.45 -3.42,1.35 -0.91,0.89 -1.36,2.12 -1.36,3.7 0,1.68 0.5,2.93 1.51,3.76 1,0.83 2.13,1.25 3.4,1.25 1.44,0 2.61,-0.47 3.5,-1.41 0.9,-0.94 1.35,-2.15 1.35,-3.64 0,-1.68 -0.52,-2.93 -1.54,-3.76 -1.03,-0.83 -2.17,-1.25 -3.44,-1.25z"/>
+     <path id="_5_20" class="fil1" d="M124.79 278.37l2.98 0 0 1.86c1.29,-1.44 2.77,-2.16 4.42,-2.16 0.68,0 1.41,0.17 2.2,0.51 0.78,0.34 1.44,0.96 1.96,1.85 0.55,0.85 0.82,2.27 0.82,4.26l0 8.38 -2.95 0 0 -8.38c0,-0.92 -0.04,-1.59 -0.13,-2.02 -0.08,-0.42 -0.3,-0.84 -0.65,-1.26 -0.55,-0.61 -1.28,-0.91 -2.2,-0.91 -1.35,0 -2.51,0.68 -3.47,2.06l0 10.51 -2.98 0 0 -14.7z"/>
+     <rect class="fil3" x="150.65" y="259.86" width="2.37" height="44.01"/>
+    </g>
+   </g>
+  </g>
+  <rect class="fil4" width="740.72" height="345.14"/>
+ </g>
+</svg>
+</div>
+  <div class="title-block">
+    <div class="title-row">
+      <h1 data-i18n="pageTitle">Machine Health Audit</h1>
+      <span class="demo-tag" id="dataTag">real capture data</span>
+    </div>
+    <p class="sub" id="reportSubtitle">V360 machine audit</p>
+  </div>
+  <div class="header-actions">
+    <button class="header-action-secondary" id="printBtn" type="button">Print / PDF</button>
+    <button class="header-action-secondary" id="downloadDataBtn" type="button">Audit JSON</button>
+    <button class="lang-toggle" id="langToggle" type="button">ગુજરાતી</button>
+    <button class="change-style-btn" id="changeStyleBtn" data-i18n="reportSettings">Report settings</button>
+    <button class="settings-toggle" id="settingsToggle" aria-expanded="false">
+      <span class="tag" data-i18n="backendTag">backend</span> <span data-i18n="scoringSettingsBtn">Scoring settings</span>
+    </button>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">Dark mode</button>
+  </div>
+</header>
+
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-panel-inner">
+    <p class="settings-title" data-i18n="backendTitle">Backend scoring settings</p>
+    <p class="settings-sub" data-i18n="backendSub">Adjust how the composite score is weighted and where the health bands fall. This is the configuration behind the numbers, not something a salesperson would touch mid-demo. Changes apply live everywhere in the report.</p>
+    <div class="settings-row">
+      <label><span data-i18n="wColorLabel">Color accuracy weight</span><span id="wColorOut">30%</span></label>
+      <input type="range" id="wColor" min="0" max="100" step="5" value="30">
+    </div>
+    <div class="settings-row">
+      <label><span data-i18n="wPictureLabel">Picture quality weight</span><span id="wPictureOut">20%</span></label>
+      <input type="range" id="wPicture" min="0" max="100" step="5" value="20">
+    </div>
+    <div class="settings-row">
+      <label><span data-i18n="wConsistLabel">Consistency weight</span><span id="wConsistOut">20%</span></label>
+      <input type="range" id="wConsist" min="0" max="100" step="5" value="20">
+    </div>
+    <div class="settings-row">
+      <label><span data-i18n="wCorrectionLabel">Correction load weight</span><span id="wCorrectionOut">18%</span></label>
+      <input type="range" id="wCorrection" min="0" max="100" step="5" value="18">
+    </div>
+    <div class="settings-row">
+      <label><span data-i18n="wSpeedLabel">Speed weight</span><span id="wSpeedOut">12%</span></label>
+      <input type="range" id="wSpeed" min="0" max="100" step="5" value="12">
+    </div>
+    <p class="settings-hint" id="weightNormHint">Normalized to 30% / 20% / 20% / 18% / 12% for scoring</p>
+    <div class="settings-row-split">
+      <div>
+        <label for="tHealthy" data-i18n="healthyLabel">Healthy at or above</label>
+        <input type="number" id="tHealthy" min="1" max="100" value="80">
+      </div>
+      <div>
+        <label for="tDanger" data-i18n="needsServiceLabel">Needs service below</label>
+        <input type="number" id="tDanger" min="0" max="99" value="60">
+      </div>
+    </div>
+    <button class="settings-reset" id="resetSettings" data-i18n="resetDefaults">Reset to defaults</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <section id="stylePicker" hidden>
+    <div class="picker-intro">
+      <h2 data-i18n="reportSettings">Report settings</h2>
+      <p data-i18n="pickerIntro">Salesperson / modern clean is the default. Audience changes what opens expanded by default; style changes how it looks. Both apply everywhere in the report.</p>
+    </div>
+    <p class="audience-label" data-i18n="audienceLabel">Audience</p>
+    <div class="audience-options" id="audienceOptions">
+      <button class="audience-btn" data-audience="manufacturer" data-i18n="manufacturer">Manufacturer</button>
+      <button class="audience-btn active" data-audience="salesperson" data-i18n="salesperson">Salesperson</button>
+      <button class="audience-btn" data-audience="engineer" data-i18n="engineer">Engineer</button>
+    </div>
+    <p class="picker-subhead"><span data-i18n="whatsVisible">What's visible</span> <span class="picker-subhead-note" data-i18n="whatsVisibleNote">(preset fills these in, every one stays yours to change)</span></p>
+    <div class="visibility-options" id="visibilityOptions">
+      <label class="vis-check"><input type="checkbox" id="visStoneTables" checked> <span data-i18n="visStoneTables">Stone-level color / quality / correction tables</span></label>
+      <label class="vis-check"><input type="checkbox" id="visMetadata" checked> <span data-i18n="visMetadata">Technical metadata section (per stone)</span></label>
+      <label class="vis-check"><input type="checkbox" id="visMetadataOpen"> &nbsp;&nbsp;<span data-i18n="visMetadataOpen">&mdash; starts expanded, not collapsed</span></label>
+      <label class="vis-check"><input type="checkbox" id="visUpgradeBand" checked> <span data-i18n="visUpgradeBand">Upgrade-path section (5.0 / 5.0 EDF)</span></label>
+      <label class="vis-check"><input type="checkbox" id="visBackendSettings" checked> <span data-i18n="visBackendSettings">Backend scoring settings button</span></label>
+    </div>
+    <div class="save-row">
+      <button class="save-settings-btn" id="saveSettingsBtn" type="button" data-i18n="saveSettingsBtn">Save settings</button>
+      <span class="save-status" id="saveStatus"></span>
+    </div>
+    <p class="picker-subhead" data-i18n="styleLabel">Style</p>
+    <div class="picker-grid">
+      <div class="picker-option" data-theme-option="modern">
+        <div class="picker-preview" data-report-theme="modern">
+          <div class="m-card" style="--status: var(--warning); cursor: default;">
+            <div class="facet"></div>
+            <p class="ref-code">ref. m-03</p>
+            <p class="m-id mono">Machine 03</p>
+            <span class="badge badge-warning">needs attention</span>
+            <div class="m-score mono">73<span class="unit">/100</span></div>
+            <div class="m-score-badge-wrap"><span class="mono">73</span></div>
+          </div>
+        </div>
+        <p class="picker-name" data-i18n="styleModern">Modern clean</p>
+        <button class="picker-btn" data-theme="modern" data-i18n="useThisStyle">Use this style</button>
+      </div>
+      <div class="picker-option" data-theme-option="instrument">
+        <div class="picker-preview" data-report-theme="instrument">
+          <div class="m-card" style="--status: var(--warning); cursor: default;">
+            <div class="facet"></div>
+            <p class="ref-code">ref. m-03</p>
+            <p class="m-id mono">Machine 03</p>
+            <span class="badge badge-warning">needs attention</span>
+            <div class="m-score mono">73<span class="unit">/100</span></div>
+            <div class="m-score-badge-wrap"><span class="mono">73</span></div>
+          </div>
+        </div>
+        <p class="picker-name" data-i18n="styleInstrument">Instrument readout</p>
+        <button class="picker-btn" data-theme="instrument" data-i18n="useThisStyle">Use this style</button>
+      </div>
+      <div class="picker-option" data-theme-option="facet">
+        <div class="picker-preview" data-report-theme="facet">
+          <div class="m-card" style="--status: var(--warning); cursor: default;">
+            <div class="facet"></div>
+            <p class="ref-code">ref. m-03</p>
+            <p class="m-id mono">Machine 03</p>
+            <span class="badge badge-warning">needs attention</span>
+            <div class="m-score mono">73<span class="unit">/100</span></div>
+            <div class="m-score-badge-wrap"><span class="mono">73</span></div>
+          </div>
+        </div>
+        <p class="picker-name" data-i18n="styleFacet">Cut &amp; facet</p>
+        <button class="picker-btn" data-theme="facet" data-i18n="useThisStyle">Use this style</button>
+      </div>
+      <div class="picker-option" data-theme-option="specsheet">
+        <div class="picker-preview" data-report-theme="specsheet">
+          <div class="m-card" style="--status: var(--warning); cursor: default;">
+            <div class="facet"></div>
+            <p class="ref-code">ref. m-03</p>
+            <p class="m-id mono">Machine 03</p>
+            <span class="badge badge-warning">needs attention</span>
+            <div class="m-score mono">73<span class="unit">/100</span></div>
+            <div class="m-score-badge-wrap"><span class="mono">73</span></div>
+          </div>
+        </div>
+        <p class="picker-name" data-i18n="styleSpecsheet">Spec sheet</p>
+        <button class="picker-btn" data-theme="specsheet" data-i18n="useThisStyle">Use this style</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="summarySection">
+    <div class="summary-grid">
+      <div class="summary-avg">
+        <span class="summary-num mono" id="summaryAvg">--</span>
+        <span class="summary-unit">/100 fleet average</span>
+        <span class="delta mono" id="summaryDelta"></span>
+        <p class="summary-metric-label" id="summaryMetricLabel"></p>
+      </div>
+      <div class="summary-dist" id="summaryDist"></div>
+    </div>
+    <div class="rank-list" id="rankList"></div>
+    <div class="conclusion">
+      <p class="conclusion-label" data-i18n="summaryLabel">Summary &amp; recommendation</p>
+      <p class="conclusion-text" id="conclusionText"></p>
+    </div>
+  </section>
+
+  <div class="score-control" id="metricControl">
+    <button class="metric-pill active" data-metric="composite" data-i18n="metricComposite">Composite</button>
+    <button class="metric-pill" data-metric="color" data-i18n="metricColor">Color accuracy</button>
+    <button class="metric-pill" data-metric="picture" data-i18n="metricPicture">Picture quality</button>
+    <button class="metric-pill" data-metric="consistency" data-i18n="metricConsistency">Consistency</button>
+    <button class="metric-pill" data-metric="speed" data-i18n="metricSpeed">Speed</button>
+    <button class="metric-pill" data-metric="correction" data-i18n="metricCorrection">Correction load</button>
+  </div>
+  <p class="hint" id="fleetHint">Machines analyzed from the selected folders.</p>
+
+  <section id="fleetView">
+    <div class="fleet-grid" id="fleetGrid"></div>
+  </section>
+
+  <section id="detailView" hidden>
+    <button class="back-btn" id="backBtn" data-i18n="backToFleet">&larr; back to fleet summary</button>
+    <div class="detail-header">
+      <h2 id="detailTitle" class="mono"></h2>
+      <span class="badge" id="detailBadge"></span>
+      <span class="delta mono" id="detailDelta"></span>
+    </div>
+    <div class="diagnosis-box">
+      <p class="diagnosis-label" data-i18n="diagnosisLabel">Diagnosis</p>
+      <p class="diagnosis-text" id="diagnosisText"></p>
+      <p class="diagnosis-fix" id="diagnosisFix"></p>
+    </div>
+    <div class="view-control" id="viewControl">
+      <button class="view-pill active" data-mode="thumb" data-i18n="thumbnail">Thumbnail</button>
+      <button class="view-pill" data-mode="full" data-i18n="fullVideo">Full video</button>
+    </div>
+    <div id="stoneList"></div>
+  </section>
+
+  <div class="report-disclosure" id="reportDisclosure"></div>
+
+  <footer>
+    <p data-i18n="footerLine1">V360 Technetronic LLP &middot; Vision 360&deg; diamond video settings analyzer &middot; confidential, internal audit use</p>
+    <p><a href="https://www.v360.tech">www.v360.tech</a> &middot; <a href="mailto:support@v360.tech">support@v360.tech</a></p>
+  </footer>
+</div>
+
+<!--V360_REPORT_DATA-->
+<script>
+var machines = [
+  {id:'Machine 01', scores:{composite:91,color:94,consistency:90,speed:88,picture:90,correction:88}},
+  {id:'Machine 02', scores:{composite:77,color:85,consistency:74,speed:70,picture:74,correction:71}},
+  {id:'Machine 03', scores:{composite:58,color:72,consistency:61,speed:38,picture:52,correction:48}},
+  {id:'Machine 04', scores:{composite:84,color:80,consistency:88,speed:84,picture:86,correction:85}},
+  {id:'Machine 05', scores:{composite:69,color:75,consistency:65,speed:66,picture:58,correction:66}},
+  {id:'Machine 06', scores:{composite:73,color:91,consistency:55,speed:68,picture:79,correction:74}}
+];
+var stones = [
+  {id:'D-1', shape:'Round'},
+  {id:'D-2', shape:'Oval'},
+  {id:'D-3', shape:'Emerald'},
+  {id:'D-4', shape:'Princess'},
+  {id:'D-5', shape:'Cushion'},
+  {id:'D-6', shape:'Radiant'}
+];
+function metricLabel(key){
+  var map = { composite:'mlComposite', color:'mlColor', consistency:'mlConsistency', speed:'mlSpeed', picture:'mlPicture', correction:'mlCorrection' };
+  return t(map[key]);
+}
+var state = { metric:'composite', activeMachine:null, compareMode:'thumb', audience:'salesperson', lang:'en' };
+var visibility = { stoneTables:true, metadata:true, metadataOpen:false, upgradeBand:true, backendSettings:true };
+
+var AUDIENCE_PRESETS = {
+  manufacturer: { stoneTables:true,  metadata:false, metadataOpen:false, upgradeBand:true,  backendSettings:true,  compareMode:'thumb' },
+  salesperson:  { stoneTables:true,  metadata:true,  metadataOpen:false, upgradeBand:true,  backendSettings:true,  compareMode:'thumb' },
+  engineer:     { stoneTables:true,  metadata:true,  metadataOpen:true,  upgradeBand:true,  backendSettings:true,  compareMode:'full'  }
+};
+
+function applyAudiencePreset(aud){
+  state.audience = aud;
+  var p = AUDIENCE_PRESETS[aud];
+  document.getElementById('visStoneTables').checked = p.stoneTables;
+  document.getElementById('visMetadata').checked = p.metadata;
+  document.getElementById('visMetadataOpen').checked = p.metadataOpen;
+  document.getElementById('visUpgradeBand').checked = p.upgradeBand;
+  document.getElementById('visBackendSettings').checked = p.backendSettings;
+  state.compareMode = p.compareMode;
+}
+
+function readVisibilityFromCheckboxes(){
+  visibility.stoneTables = document.getElementById('visStoneTables').checked;
+  visibility.metadata = document.getElementById('visMetadata').checked;
+  visibility.metadataOpen = document.getElementById('visMetadataOpen').checked;
+  visibility.upgradeBand = document.getElementById('visUpgradeBand').checked;
+  visibility.backendSettings = document.getElementById('visBackendSettings').checked;
+}
+
+function applyVisibilityToPage(){
+  document.getElementById('settingsToggle').hidden = !visibility.backendSettings;
+  document.documentElement.setAttribute('data-audience', state.audience);
+  document.documentElement.setAttribute('data-upgrade-band', visibility.upgradeBand ? 'shown' : 'hidden');
+}
+
+function saveSettings(){
+  var payload = JSON.stringify({
+    theme: document.documentElement.getAttribute('data-report-theme'),
+    audience: state.audience,
+    lang: state.lang,
+    visibility: visibility
+  });
+  try {
+    localStorage.setItem('v360_report_settings', payload);
+    var roundTrip = localStorage.getItem('v360_report_settings');
+    return roundTrip === payload;
+  } catch(e){
+    return false;
+  }
+}
+
+function loadSettings(){
+  try {
+    var raw = localStorage.getItem('v360_report_settings');
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e){ return null; }
+}
+var weights = { color:30, picture:20, consistency:20, speed:12, correction:18 };
+var thresholds = { healthy:80, danger:60 };
+var lastValues = {};
+
+var LANG = {
+  en: {
+    mlComposite:'composite score', mlColor:'color accuracy', mlConsistency:'stone consistency', mlSpeed:'capture speed', mlPicture:'picture quality', mlCorrection:'correction load',
+    vsIdealSuffix:'vs ideal', acrossAllSuffix:'\u00b7 across all {n} machines shown',
+    fleetAvgTooltip:'fleet average', vsFleetTooltip:'vs fleet average',
+    backendTag:'backend', scoringSettingsBtn:'Scoring settings', backendTitle:'Backend scoring settings', backendSub:'Adjust how the composite score is weighted and where the health bands fall. This is the configuration behind the numbers, not something a salesperson would touch mid-demo. Changes apply live everywhere in the report.', wColorLabel:'Color accuracy weight', wPictureLabel:'Picture quality weight', wConsistLabel:'Consistency weight', wCorrectionLabel:'Correction load weight', wSpeedLabel:'Speed weight', healthyLabel:'Healthy at or above', needsServiceLabel:'Needs service below', resetDefaults:'Reset to defaults', normalizedPrefix:'Normalized to', normalizedSuffix:'for scoring (raw total: {t}%)',
+    pageTitle:'Machine Health Audit', demoTag:'sample data \u00b7 demo', reportSettings:'Report settings',
+    darkMode:'Dark mode', lightMode:'Light mode',
+    pickerIntro:'Salesperson / modern clean is the default. Audience changes what opens expanded by default; style changes how it looks. Both apply everywhere in the report.',
+    audienceLabel:'Audience', manufacturer:'Manufacturer', salesperson:'Salesperson', engineer:'Engineer',
+    whatsVisible:'What\u2019s visible', whatsVisibleNote:'(preset fills these in, every one stays yours to change)',
+    visStoneTables:'Stone-level color / quality / correction tables', visMetadata:'Technical metadata section (per stone)',
+    visMetadataOpen:'\u2014 starts expanded, not collapsed', visUpgradeBand:'Upgrade-path section (5.0 / 5.0 EDF)',
+    visBackendSettings:'Backend scoring settings button',
+    saveSettingsBtn:'Save settings',
+    saveOk:'Settings saved \u2014 will still be here next time you open this file.',
+    saveFail:'Couldn\u2019t save in this browser \u2014 your choices still apply now, just won\u2019t survive a reload.',
+    styleLabel:'Style', styleModern:'Modern clean', styleInstrument:'Instrument readout', styleFacet:'Cut & facet', styleSpecsheet:'Spec sheet',
+    useThisStyle:'Use this style',
+    metricComposite:'Composite', metricColor:'Color accuracy', metricPicture:'Picture quality', metricConsistency:'Consistency', metricSpeed:'Speed', metricCorrection:'Correction load',
+    fleetHint:'6 of 14 machines shown for this demo \u2014 the live report scales to however many exist for a given fleet.',
+    backToFleet:'\u2190 back to fleet summary', thumbnail:'Thumbnail', fullVideo:'Full video',
+    diagnosisLabel:'Diagnosis', recommendedLabel:'Recommended:',
+    showMetadata:'Show technical metadata \u2193', hideMetadata:'Hide technical metadata \u2191',
+    thisMachine:'this machine', idealReference:'ideal reference',
+    rowDiamond:'diamond', rowBackground:'background', rowSharpness:'sharpness', rowContrast:'contrast', rowCorrection:'correction needed', colDifference:'difference',
+    upgradeUnlocks:'what an upgrade unlocks',
+    footerLine1:'V360 Technetronic LLP \u00b7 Vision 360\u00b0 diamond video settings analyzer \u00b7 confidential, internal audit use',
+    statusHealthy:'healthy', statusWarning:'needs attention', statusDanger:'needs service',
+    fleetAvgLabel:'/100 fleet average', summaryLabel:'Summary & recommendation',
+    metaCapture:'Capture settings', metaFrame:'Frame / image settings', metaLighting:'Lighting / tone settings', metaMachine:'Machine / software', metaProfile:'Profile',
+    vOk:'consistent', vWarn:'minor drift', vBad:'notable difference',
+    qOk:'matched', qWarn:'minor drift', qBad:'notable difference',
+    cOk:'consistent with the reference', cWarn:'creeping upward', cBad:'notably elevated',
+    langName:'English'
+  },
+  gu: {
+    mlComposite:'કમ્પોઝિટ સ્કોર', mlColor:'કલર ચોકસાઈ', mlConsistency:'સ્ટોન સાતત્ય', mlSpeed:'કેપ્ચર ઝડપ', mlPicture:'ચિત્ર ગુણવત્તા', mlCorrection:'કરેક્શન લોડ',
+    vsIdealSuffix:'આદર્શ સામે', acrossAllSuffix:'· દરેક {n} મશીનમાં', 
+    fleetAvgTooltip:'ફ્લીટ સરેરાશ', vsFleetTooltip:'ફ્લીટ સરેરાશ સામે', 
+    backendTag:'બેકએન્ડ', scoringSettingsBtn:'સ્કોરિંગ સેટિંગ્સ', backendTitle:'બેકએન્ડ સ્કોરિંગ સેટિંગ્સ', backendSub:'કમ્પોઝિટ સ્કોરનું વેઇટિંગ અને હેલ્થ બેન્ડ ક્યાં આવે છે તે અહીં ગોઠવો. આ નંબરો પાછળનું કન્ફિગરેશન છે, સેલ્સપર્સન ડેમો દરમિયાન આને અડે નહીં. ફેરફારો રિપોર્ટમાં તરત જ લાગુ થાય છે.', wColorLabel:'કલર ચોકસાઈ વેઇટ', wPictureLabel:'ચિત્ર ગુણવત્તા વેઇટ', wConsistLabel:'સાતત્ય વેઇટ', wCorrectionLabel:'કરેક્શન લોડ વેઇટ', wSpeedLabel:'ઝડપ વેઇટ', healthyLabel:'આટલા કે વધુ પર સ્વસ્થ', needsServiceLabel:'આનાથી ઓછા પર સર્વિસ જરૂરી', resetDefaults:'ડિફોલ્ટ પર રીસેટ કરો', normalizedPrefix:'સ્કોરિંગ માટે નોર્મલાઇઝ્ડ:', normalizedSuffix:'(કુલ: {t}%)', 
+    pageTitle:'મશીન હેલ્થ ઓડિટ', demoTag:'નમૂના ડેટા · ડેમો', reportSettings:'રિપોર્ટ સેટિંગ્સ',
+    darkMode:'ડાર્ક મોડ', lightMode:'લાઇટ મોડ',
+    pickerIntro:'સેલ્સપર્સન / મોડર્ન ક્લીન ડિફોલ્ટ છે. ઓડિયન્સ બદલવાથી શું ડિફોલ્ટ રીતે ખુલ્લું રહે છે તે બદલાય છે; શૈલી બદલવાથી દેખાવ બદલાય છે. બંને આખા રિપોર્ટમાં લાગુ થાય છે.',
+    audienceLabel:'ઓડિયન્સ', manufacturer:'ઉત્પાદક', salesperson:'સેલ્સપર્સન', engineer:'એન્જિનિયર',
+    whatsVisible:'શું દેખાય છે', whatsVisibleNote:'શું દેખાય છેNote',
+    visStoneTables:'સ્ટોન-લેવલ કલર / ક્વોલિટી / કરેક્શન કોષ્ટકો', visMetadata:'ટેકનિકલ મેટાડેટા વિભાગ (દરેક સ્ટોન માટે)',
+    visMetadataOpen:'ટેકનિકલ મેટાડેટા વિભાગ (દરેક સ્ટોન માટે)Open', visUpgradeBand:'અપગ્રેડ-પાથ વિભાગ (5.0 / 5.0 EDF)',
+    visBackendSettings:'બેકએન્ડ સ્કોરિંગ સેટિંગ્સ બટન',
+    saveSettingsBtn:'સેટિંગ્સ સેવ કરો',
+    saveOk:'સેટિંગ્સ સેવ થઈ — આ ફાઇલ ફરી ખોલશો ત્યારે પણ રહેશે.',
+    saveFail:'આ બ્રાઉઝરમાં સેવ ન થઈ શક્યું — તમારી પસંદગી અત્યારે લાગુ છે, પણ રીલોડ પછી નહીં રહે.',
+    styleLabel:'શૈલી', styleModern:'મોડર્ન ક્લીન', styleInstrument:'ઇન્સ્ટ્રુમેન્ટ રીડઆઉટ', styleFacet:'કટ એન્ડ ફેસેટ', styleSpecsheet:'સ્પેક શીટ',
+    useThisStyle:'આ શૈલી વાપરો',
+    metricComposite:'કમ્પોઝિટ', metricColor:'કલર ચોકસાઈ', metricPicture:'ચિત્ર ગુણવત્તા', metricConsistency:'સાતત્ય', metricSpeed:'ઝડપ', metricCorrection:'કરેક્શન લોડ',
+    fleetHint:'આ ડેમો માટે 14માંથી 6 મશીન બતાવ્યાં છે — લાઇવ રિપોર્ટ જેટલાં મશીન હોય તે પ્રમાણે ગોઠવાય છે.',
+    backToFleet:'← ફ્લીટ સારાંશ પર પાછા', thumbnail:'થંબનેલ', fullVideo:'સંપૂર્ણ વિડિયો',
+    diagnosisLabel:'નિદાન', recommendedLabel:'ભલામણ:',
+    showMetadata:'ટેકનિકલ મેટાડેટા બતાવો ↓', hideMetadata:'ટેકનિકલ મેટાડેટા છુપાવો ↑',
+    thisMachine:'આ મશીન', idealReference:'આદર્શ સંદર્ભ',
+    rowDiamond:'હીરો', rowBackground:'બેકગ્રાઉન્ડ', rowSharpness:'શાર્પનેસ', rowContrast:'કોન્ટ્રાસ્ટ', rowCorrection:'કરેક્શન જરૂરી', colDifference:'તફાવત',
+    upgradeUnlocks:'અપગ્રેડ શું આપે છે',
+    footerLine1:'V360 ટેકનેટ્રોનિક LLP · Vision 360° ડાયમંડ વિડિયો સેટિંગ્સ એનાલાઇઝર · ગોપનીય, આંતરિક ઓડિટ ઉપયોગ',
+    statusHealthy:'સ્વસ્થ', statusWarning:'ધ્યાન જરૂરી', statusDanger:'સર્વિસ જરૂરી',
+    fleetAvgLabel:'/100 ફ્લીટ સરેરાશ', summaryLabel:'સારાંશ અને ભલામણ',
+    metaCapture:'કેપ્ચર સેટિંગ્સ', metaFrame:'ફ્રેમ / ઇમેજ સેટિંગ્સ', metaLighting:'લાઇટિંગ / ટોન સેટિંગ્સ', metaMachine:'મશીન / સોફ્ટવેર', metaProfile:'પ્રોફાઇલ',
+    vOk:'સાતત્યપૂર્ણ', vWarn:'થોડું વિચલન', vBad:'નોંધપાત્ર તફાવત',
+    qOk:'મેળ ખાય છે', qWarn:'થોડું વિચલન', qBad:'નોંધપાત્ર તફાવત',
+    cOk:'સંદર્ભ સાથે સુસંગત', cWarn:'ધીમે ધીમે વધી રહ્યું છે', cBad:'નોંધપાત્ર રીતે વધારે',
+    langName:'ગુજરાતી'
+  }
+};
+function t(key){ return (LANG[state.lang] && LANG[state.lang][key]) || LANG.en[key] || key; }
+var IDEAL_CORRECTION_DIST = 18;
+
+function recomputeComposite(){
+  var total = weights.color + weights.picture + weights.consistency + weights.speed + weights.correction || 1;
+  machines.forEach(function(m){
+    var c = (m.scores.color*weights.color + m.scores.picture*weights.picture + m.scores.consistency*weights.consistency +
+             m.scores.speed*weights.speed + m.scores.correction*weights.correction) / total;
+    m.scores.composite = Math.round(c);
+  });
+}
+
+function animatedNumber(el, key, to){
+  var from = (key in lastValues) ? lastValues[key] : to;
+  lastValues[key] = to;
+  if(from === to){ el.textContent = to; return; }
+  var start = null, duration = 450;
+  function step(ts){
+    if(!start) start = ts;
+    var p = Math.min((ts-start)/duration, 1);
+    var eased = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(from + (to-from)*eased);
+    if(p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function playEnter(el){
+  el.classList.remove('view-enter');
+  void el.offsetWidth;
+  el.classList.add('view-enter');
+}
+
+function statusFor(v){ return v>=thresholds.healthy?'success':(v>=thresholds.danger?'warning':'danger'); }
+function fmtDelta(d){ d = Math.round(d); return (d>0?'+':'') + d; }
+function deltaClass(d){ return d>=0 ? 'delta-ok' : (d>=-15 ? 'delta-warn' : 'delta-bad'); }
+function statusLabel(s){ return s==='success'?t('statusHealthy'):(s==='warning'?t('statusWarning'):t('statusDanger')); }
+function jitter(base,i){ var offs=[3,-4,2,-2,5,-3]; return Math.max(0,Math.min(100, Math.round(base+offs[i%offs.length]))); }
+
+function seeded01(seed){ var x = Math.sin(seed*999)*10000; return x - Math.floor(x); }
+function strSeed(s){ var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))%100000; } return h; }
+
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  var max=Math.max(r,g,b), min=Math.min(r,g,b), h=0, s=0, l=(max+min)/2;
+  if(max!==min){
+    var d = max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    if(max===r) h=(g-b)/d+(g<b?6:0);
+    else if(max===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h/=6;
+  }
+  return { l:Math.round(l*100), s:Math.round(s*100), h:Math.round(h*360) };
+}
+
+function rgbDist(a,b){ return Math.sqrt(Math.pow(a[0]-b[0],2)+Math.pow(a[1]-b[1],2)+Math.pow(a[2]-b[2],2)); }
+function verdictClass(d){ return d<3 ? 'ok' : (d<8 ? 'warn' : 'bad'); }
+function verdictWord(d){ return d<3 ? t('vOk') : (d<8 ? t('vWarn') : t('vBad')); }
+
+function stoneColorData(m, stoneIndex){
+  var diamondBase = [178,180,185], bgBase = [150,150,152];
+  function vary(base, seedOffset, spread){
+    return base.map(function(ch,i){
+      var f = seeded01(stoneIndex*7 + seedOffset + i*3 + strSeed(m.id));
+      return Math.max(0, Math.min(255, Math.round(ch + (f-0.5)*2*spread)));
+    });
+  }
+  var idealDiamond = vary(diamondBase, 1, 3);
+  var idealBg = vary(bgBase, 2, 2);
+  var diamondDrift = (100 - m.scores.color) / 100;
+  var bgDrift = (100 - m.scores.consistency) / 100;
+  var machDiamond = vary(idealDiamond, 31, 2 + diamondDrift*15);
+  var machBg = vary(idealBg, 47, 2 + bgDrift*15);
+  return {
+    diamond: { mach: machDiamond, ideal: idealDiamond, dist: rgbDist(machDiamond, idealDiamond) },
+    bg: { mach: machBg, ideal: idealBg, dist: rgbDist(machBg, idealBg) }
+  };
+}
+
+function renderSummary(){
+  var key = state.metric;
+  var vals = machines.map(function(m){ return m.scores[key]; });
+  var avg = Math.round(vals.reduce(function(a,b){ return a+b; },0) / vals.length);
+  var counts = {success:0,warning:0,danger:0};
+  machines.forEach(function(m){ counts[statusFor(m.scores[key])]++; });
+
+  animatedNumber(document.getElementById('summaryAvg'), 'summary', avg);
+  var avgDelta = document.getElementById('summaryDelta');
+  avgDelta.textContent = fmtDelta(avg-100) + ' ' + t('vsIdealSuffix');
+  avgDelta.className = 'delta mono ' + deltaClass(avg-100);
+  document.getElementById('summaryMetricLabel').textContent = metricLabel(key) + ' ' + t('acrossAllSuffix').replace('{n}', machines.length);
+
+  document.getElementById('summaryDist').innerHTML =
+    '<span class="dist-item"><span class="dist-dot" style="background:var(--success)"></span>'+counts.success+' '+t('statusHealthy')+'</span>' +
+    '<span class="dist-item"><span class="dist-dot" style="background:var(--warning)"></span>'+counts.warning+' '+t('statusWarning')+'</span>' +
+    '<span class="dist-item"><span class="dist-dot" style="background:var(--danger)"></span>'+counts.danger+' '+t('statusDanger')+'</span>';
+
+  var sorted = machines.slice().sort(function(a,b){ return b.scores[key]-a.scores[key]; });
+  var best = sorted[0], worst = sorted[sorted.length-1];
+  var rankList = document.getElementById('rankList');
+  rankList.innerHTML = '';
+  sorted.forEach(function(m){
+    var v = m.scores[key], s = statusFor(v);
+    var vsFleet = v - avg;
+    var row = document.createElement('div');
+    row.className = 'rank-row';
+    row.innerHTML =
+      '<span class="rank-id mono">'+m.id+'</span>' +
+      '<div class="rank-track"><div class="rank-fill" style="width:'+v+'%;background:var(--'+s+')"></div>' +
+      '<div class="rank-avg-line" style="left:'+avg+'%" title="'+t('fleetAvgTooltip')+'"></div></div>' +
+      '<span class="rank-score mono">'+v+'</span>' +
+      '<span class="delta mono '+deltaClass(vsFleet)+'" title="'+t('vsFleetTooltip')+'">'+fmtDelta(vsFleet)+'</span>';
+    row.onclick = function(){ openDetail(m.id); };
+    rankList.appendChild(row);
+  });
+
+  var laggards = counts.warning + counts.danger;
+  var potentialGain = laggards>0 ? Math.round((best.scores[key]-avg) * laggards / machines.length) : 0;
+  var conclusion;
+  if(state.lang === 'gu'){
+    conclusion = 'ફ્લીટ સરેરાશ '+metricLabel(key)+' પર '+avg+'/100 છે. '+machines.length+'માંથી '+counts.success+
+      ' મશીન આદર્શ સ્તરે કામ કરે છે, '+counts.warning+' રિકેલિબ્રેશનથી ફાયદો મેળવી શકે છે, અને '+counts.danger+
+      ' સર્વિસ વિઝિટ તરફ ઈશારો કરતાં ચિહ્નો બતાવે છે \u2014 ખાસ કરીને '+worst.id+', જે આ માપ પર આદર્શથી સૌથી દૂર છે.';
+    if(laggards>0){
+      conclusion += ' '+laggards+' પાછળ રહેલા મશીનને ફ્લીટના શ્રેષ્ઠ પ્રદર્શન કરનાર ('+best.id+
+        ') તરફ લાવવાથી સરેરાશ આશરે '+potentialGain+' પોઈન્ટ વધી શકે છે.';
+    }
+    conclusion += ' '+worst.id+' માટે, તેના ડિટેલ પેજ પર "અપગ્રેડ શું આપે છે" જોવું એ સૌથી સ્પષ્ટ આગળનું પગલું છે.';
+  } else {
+    conclusion = 'Fleet average sits at '+avg+'/100 on '+metricLabel(key)+'. '+counts.success+' of '+machines.length+
+      ' machines are performing at ideal levels, '+counts.warning+' would likely benefit from recalibration, and '+counts.danger+
+      ' show signs that point toward a service visit \u2014 most notably '+worst.id+', furthest from the ideal reference on this measure.';
+    if(laggards>0){
+      conclusion += ' Bringing the '+laggards+' lagging machine'+(laggards>1?'s':'')+' back toward the fleet\u2019s own best performer ('+best.id+
+        ') would lift the average by roughly '+potentialGain+' points.';
+    }
+    conclusion += ' For '+worst.id+', the "what an upgrade unlocks" view on its detail page is the clearest next thing to show.';
+  }
+  document.getElementById('conclusionText').textContent = conclusion;
+}
+
+function renderFleet(){
+  var grid = document.getElementById('fleetGrid');
+  grid.innerHTML = '';
+  machines.forEach(function(m, i){
+    var v = m.scores[state.metric];
+    var s = statusFor(v);
+    var card = document.createElement('div');
+    card.className = 'm-card';
+    card.style.setProperty('--status', 'var(--'+s+')');
+    card.style.animationDelay = (i*45)+'ms';
+    var dots = stones.map(function(){ return '<span class="dot" style="background:var(--'+s+')"></span>'; }).join('');
+    card.innerHTML =
+      '<div class="facet"></div>' +
+      '<p class="ref-code">ref. '+m.id.replace('Machine ','m-')+'</p>' +
+      '<p class="m-id mono">'+m.id+'</p>' +
+      '<span class="badge badge-'+s+'">'+statusLabel(s)+'</span>' +
+      '<div class="m-score mono"><span class="m-score-num">0</span><span class="unit">/100</span><span class="delta '+deltaClass(v-100)+'" title="vs ideal">'+fmtDelta(v-100)+'</span></div>' +
+      '<div class="m-score-badge-wrap"><span class="m-score-badge-num mono">0</span></div>' +
+      '<p class="m-metric">'+metricLabel(state.metric)+'</p>' +
+      '<div class="mini-stones">'+dots+'</div>';
+    card.onclick = function(){ openDetail(m.id); };
+    grid.appendChild(card);
+    animatedNumber(card.querySelector('.m-score-num'), 'machine:'+m.id, v);
+    animatedNumber(card.querySelector('.m-score-badge-num'), 'machine-badge:'+m.id, v);
+  });
+}
+
+function buildRecommendedFix(m){
+  var overrides = MACHINE_META_OVERRIDES[m.id] || {};
+  var fields = Object.keys(overrides);
+  var idealLookup = {};
+  Object.keys(IDEAL_META).forEach(function(sec){ IDEAL_META[sec].forEach(function(pair){ idealLookup[pair[0]] = pair[1]; }); });
+
+  if(state.lang === 'gu'){
+    if(fields.length === 0){
+      return { clean:true, text:'કોઈ સેટિંગ મેળ ખાતું નથી એવું જોવા મળ્યું નથી — સેટિંગ્સ પહેલેથી આદર્શ સંદર્ભ પ્રોફાઇલ સાથે મેળ ખાય છે.' };
+    }
+    var fixesGu = fields.map(function(f){ return f+' (હાલમાં '+overrides[f]+', હોવું જોઈએ '+idealLookup[f]+')'; });
+    return { clean:false, text:'આ સુધારો: '+fixesGu.join(' અને ')+'.' };
+  }
+
+  if(fields.length === 0){
+    return { clean:true, text:'no configuration mismatches found \u2014 settings already match the ideal reference profile.' };
+  }
+  var fixes = fields.map(function(f){ return f+' (currently '+overrides[f]+', should be '+idealLookup[f]+')'; });
+  return { clean:false, text:'adjust '+fixes.join(' and ')+'.' };
+}
+
+function buildMachineDiagnosis(m){
+  var subs = [
+    { key:'color', label:t('mlColor'), v:m.scores.color },
+    { key:'picture', label:t('mlPicture'), v:m.scores.picture },
+    { key:'consistency', label:t('mlConsistency'), v:m.scores.consistency },
+    { key:'correction', label:t('mlCorrection'), v:m.scores.correction },
+    { key:'speed', label:t('mlSpeed'), v:m.scores.speed }
+  ];
+  var bySc = subs.slice().sort(function(a,b){ return a.v-b.v; });
+  var weakest = bySc[0], strongest = bySc[4];
+
+  var diamondDists = [], bgDists = [];
+  stones.forEach(function(st,i){
+    var cd = stoneColorData(m,i);
+    diamondDists.push({ id:st.id, dist:cd.diamond.dist });
+    bgDists.push({ id:st.id, dist:cd.bg.dist });
+  });
+  var avgD = diamondDists.reduce(function(a,b){ return a+b.dist; },0) / diamondDists.length;
+  var avgB = bgDists.reduce(function(a,b){ return a+b.dist; },0) / bgDists.length;
+  var worstD = diamondDists.slice().sort(function(a,b){ return b.dist-a.dist; })[0];
+  var envIssue = avgB > avgD && avgB >= 5;
+
+  var status = statusFor(m.scores.composite);
+  var belowBy = Math.round(thresholds.healthy - m.scores.composite);
+  var gap = strongest.v - weakest.v;
+
+  if(state.lang === 'gu'){
+    var textGu = m.id + ' કુલ ' + m.scores.composite + '/100 સ્કોર કરે છે (' + fmtDelta(m.scores.composite-100) + ' આદર્શ સામે), ' +
+      (status==='success' ? 'સ્વસ્થ શ્રેણીમાં છે. ' : (belowBy + ' પોઈન્ટ સ્વસ્થ રેખાથી નીચે છે. ')) +
+      'સૌથી નબળું ક્ષેત્ર ' + weakest.label + ' છે, ' + weakest.v + '/100 પર, તેના સૌથી મજબૂત ક્ષેત્ર (' + strongest.label + ' ' + strongest.v + '/100) કરતાં ' + gap + ' પોઈન્ટ પાછળ. ';
+    if(envIssue){
+      textGu += '6 સ્ટોનમાં, બેકગ્રાઉન્ડ પેચ ડાયમંડ રીડિંગ કરતાં આદર્શ સંદર્ભથી વધુ ખસે છે (સરેરાશ Δ' + avgB.toFixed(1) + ' વિરુદ્ધ Δ' + avgD.toFixed(1) + ') — આ કેપ્ચર એન્વાયર્નમેન્ટ (લાઇટિંગ અથવા બેકડ્રોપ) તરફ ઈશારો કરે છે, ડાયમંડ ઓપ્ટિક્સ તરફ નહીં.';
+    } else {
+      textGu += worstD.id + ' આદર્શથી સૌથી વધુ તફાવત બતાવે છે (Δ' + worstD.dist.toFixed(1) + '), બેકગ્રાઉન્ડ રીડિંગ પ્રમાણમાં સ્થિર છે — આ એન્વાયર્નમેન્ટને બદલે ડાયમંડ-સાઇડ કેલિબ્રેશન સમસ્યા સાથે સુસંગત છે.';
+    }
+    return textGu;
+  }
+
+  var text = m.id + ' scores ' + m.scores.composite + '/100 overall (' + fmtDelta(m.scores.composite-100) + ' vs ideal), ' +
+    (status==='success' ? 'within the healthy band. ' : (belowBy + (belowBy===1?' point':' points') + ' below the healthy line. ')) +
+    'The weakest area is ' + weakest.label + ' at ' + weakest.v + '/100, ' + gap + ' points behind its strongest area (' + strongest.label + ' at ' + strongest.v + '). ';
+
+  if(envIssue){
+    text += 'Across the 6 stones, the background patch drifts from the ideal reference more than the diamond reading does (avg Δ' + avgB.toFixed(1) + ' vs Δ' + avgD.toFixed(1) + ') — that points at the capture environment (lighting or backdrop) rather than the diamond optics.';
+  } else {
+    text += worstD.id + ' shows the widest gap from ideal (Δ' + worstD.dist.toFixed(1) + '), with background readings comparatively steady — consistent with a diamond-side calibration issue rather than the environment.';
+  }
+  return text;
+}
+
+function qualityVerdictClass(d){ return d===0 ? 'ok' : (d===1 ? 'warn' : 'bad'); }
+function qualityVerdictWord(d){ return d===0 ? t('qOk') : (d===1 ? t('qWarn') : t('qBad')); }
+
+function stoneQualityData(m, stoneIndex){
+  var pqDrift = (100 - m.scores.picture) / 100;
+  var sharpIdeal = 7, contrastIdeal = 0;
+  var f1 = seeded01(stoneIndex*11 + strSeed(m.id) + 5);
+  var f2 = seeded01(stoneIndex*13 + strSeed(m.id) + 9);
+  var sharpMach = Math.max(0, Math.min(10, Math.round(sharpIdeal - pqDrift*4 + (f1-0.5)*2)));
+  var contrastMach = Math.round((f2-0.5)*2*(1+pqDrift*4));
+  return {
+    sharpness: { mach:sharpMach, ideal:sharpIdeal, diff:Math.abs(sharpMach-sharpIdeal) },
+    contrast: { mach:contrastMach, ideal:contrastIdeal, diff:Math.abs(contrastMach-contrastIdeal) }
+  };
+}
+
+function correctionVerdictClass(d){ return d<8 ? 'ok' : (d<25 ? 'warn' : 'bad'); }
+function correctionVerdictWord(d){ return d<8 ? t('cOk') : (d<25 ? t('cWarn') : t('cBad')); }
+
+function stoneCorrectionData(m, stoneIndex){
+  var drift = (100 - m.scores.correction) / 100;
+  var f = seeded01(stoneIndex*17 + strSeed(m.id) + 23);
+  var machDist = Math.round((IDEAL_CORRECTION_DIST + drift*70 + (f-0.5)*8) * 10) / 10;
+  machDist = Math.max(0, machDist);
+  var over = Math.round((machDist - IDEAL_CORRECTION_DIST) * 10) / 10;
+  return { mach: machDist, ideal: IDEAL_CORRECTION_DIST, over: over };
+}
+
+var IDEAL_META = {
+  'Capture settings': [
+    ['AV','9'], ['TV','1/60'], ['ISO','ISO250'], ['K','5200'], ['WB','Auto'],
+    ['PictureStyle','Auto'], ['Quality','Ideal'], ['Sharpness','7'], ['Contrast','0'], ['Saturation','0'], ['ColorTone','0']
+  ],
+  'Frame / image settings': [
+    ['Width','758'], ['Height','600'], ['ImageQuality','100']
+  ],
+  'Lighting / tone settings': [
+    ['Gamma','0'], ['MinInputLevel','0'], ['MaxInputLevel','255'], ['MinOutputLevel','0'], ['MaxOutputLevel','255'], ['Tolerance','0']
+  ],
+  'Machine / software': [
+    ['Camera','Canon EOS 6D Mark II'], ['CameraAppVersion','4.0.0.43'], ['MachineName','Vision360'], ['StoneType','V360'], ['IsFreeze','False']
+  ],
+  'Profile': [
+    ['VisionProfile','VISION-B']
+  ]
+};
+
+var MACHINE_META_OVERRIDES = {
+  'Machine 01': {},
+  'Machine 02': { 'TV':'1/30' },
+  'Machine 03': { 'TV':'1/15', 'ISO':'ISO400' },
+  'Machine 04': { 'K':'5600' },
+  'Machine 05': { 'Sharpness':'5', 'PictureStyle':'Standard' },
+  'Machine 06': { 'Tolerance':'3' }
+};
+
+function buildMetadataTable(m){
+  var overrides = MACHINE_META_OVERRIDES[m.id] || {};
+  var sections = [];
+  Object.keys(IDEAL_META).forEach(function(sectionName){
+    var rows = IDEAL_META[sectionName].map(function(pair){
+      var field = pair[0], idealVal = pair[1];
+      var machVal = overrides.hasOwnProperty(field) ? overrides[field] : idealVal;
+      return { field:field, mach:machVal, ideal:idealVal, mismatch: machVal !== idealVal };
+    });
+    sections.push({ name:sectionName, rows:rows });
+  });
+  return sections;
+}
+
+function metaSectionLabel(name){
+  var map = { 'Capture settings':'metaCapture', 'Frame / image settings':'metaFrame', 'Lighting / tone settings':'metaLighting', 'Machine / software':'metaMachine', 'Profile':'metaProfile' };
+  return t(map[name]) || name;
+}
+
+function buildMetadataHtml(m){
+  var sections = buildMetadataTable(m);
+  var html = '';
+  sections.forEach(function(sec){
+    html += '<p class="meta-section-title">'+metaSectionLabel(sec.name)+'</p>';
+    html += '<div class="meta-table">';
+    html += '<div class="meta-head"></div><div class="meta-head">'+t('thisMachine')+'</div><div class="meta-head">'+t('idealReference')+'</div>';
+    sec.rows.forEach(function(r){
+      var mm = r.mismatch ? ' meta-mismatch' : '';
+      html += '<div class="meta-field'+mm+'">'+r.field+'</div>';
+      html += '<div class="meta-val mono'+mm+'">'+r.mach+'</div>';
+      html += '<div class="meta-val mono">'+r.ideal+'</div>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+function renderDetail(){
+  var m = machines.filter(function(x){ return x.id === state.activeMachine; })[0];
+  if(!m) return;
+  document.getElementById('detailTitle').textContent = m.id;
+  var v = m.scores[state.metric];
+  var s = statusFor(v);
+  var badge = document.getElementById('detailBadge');
+  badge.className = 'badge badge-'+s;
+  badge.textContent = statusLabel(s)+' \u00b7 '+v+'/100 '+metricLabel(state.metric);
+  var dEl = document.getElementById('detailDelta');
+  dEl.textContent = fmtDelta(v-100) + ' vs ideal';
+  dEl.className = 'delta mono ' + deltaClass(v-100);
+  document.getElementById('diagnosisText').textContent = buildMachineDiagnosis(m);
+  var fixEl = document.getElementById('diagnosisFix');
+  var fix = buildRecommendedFix(m);
+  fixEl.innerHTML = '<span class="fix-label">'+t('recommendedLabel')+'</span> ' + fix.text;
+  fixEl.className = 'diagnosis-fix ' + (fix.clean ? 'fix-clean' : 'fix-action');
+
+  var list = document.getElementById('stoneList');
+  list.innerHTML = '';
+  var metaHtml = buildMetadataHtml(m);
+  stones.forEach(function(st,i){
+    var sv = jitter(v,i);
+    var ss = statusFor(sv);
+    var cd = stoneColorData(m, i);
+    var qd = stoneQualityData(m, i);
+    var xd = stoneCorrectionData(m, i);
+    var dHsl = rgbToHsl(cd.diamond.mach[0],cd.diamond.mach[1],cd.diamond.mach[2]);
+    var dHslIdeal = rgbToHsl(cd.diamond.ideal[0],cd.diamond.ideal[1],cd.diamond.ideal[2]);
+    var bHsl = rgbToHsl(cd.bg.mach[0],cd.bg.mach[1],cd.bg.mach[2]);
+    var bHslIdeal = rgbToHsl(cd.bg.ideal[0],cd.bg.ideal[1],cd.bg.ideal[2]);
+    var dVerdict = verdictWord(cd.diamond.dist), dClass = verdictClass(cd.diamond.dist);
+    var bVerdict = verdictWord(cd.bg.dist), bClass = verdictClass(cd.bg.dist);
+    var shClass = qualityVerdictClass(qd.sharpness.diff), shVerdict = qualityVerdictWord(qd.sharpness.diff);
+    var coClass = qualityVerdictClass(qd.contrast.diff), coVerdict = qualityVerdictWord(qd.contrast.diff);
+
+    var headHtml =
+      '<div class="stone-row-head">' +
+        '<div class="stone-id"><span class="mono">'+st.id+'</span><span class="shape">'+st.shape+'</span></div>' +
+        '<div class="stone-score mono" style="color:var(--'+ss+')"><span class="stone-score-num">0</span><span class="delta '+deltaClass(sv-100)+'" title="vs ideal">'+fmtDelta(sv-100)+'</span></div>' +
+      '</div>';
+
+    var compareHtml =
+      '<div class="compare '+(state.compareMode==='full'?'full':'')+'">' +
+        '<div class="chip">'+t('thisMachine')+'</div><div class="chip chip-ideal">'+t('idealReference')+'</div>' +
+      '</div>';
+
+    var tablesHtml = '';
+    if(visibility.stoneTables){
+      tablesHtml =
+        '<div class="color-table">' +
+          '<div class="ct-head"></div><div class="ct-head">'+t('thisMachine')+'</div><div class="ct-head">'+t('idealReference')+'</div><div class="ct-head">'+t('colDifference')+'</div>' +
+          '<div class="ct-rowlabel">'+t('rowDiamond')+'</div>' +
+          '<div class="ct-cell mono">'+cd.diamond.mach.join(',')+'<span class="ct-hsl">L'+dHsl.l+' S'+dHsl.s+' H'+dHsl.h+'</span></div>' +
+          '<div class="ct-cell mono">'+cd.diamond.ideal.join(',')+'<span class="ct-hsl">L'+dHslIdeal.l+' S'+dHslIdeal.s+' H'+dHslIdeal.h+'</span></div>' +
+          '<div class="ct-cell ct-diff '+dClass+'">\u0394'+cd.diamond.dist.toFixed(1)+' &middot; '+dVerdict+'</div>' +
+          '<div class="ct-rowlabel">'+t('rowBackground')+'</div>' +
+          '<div class="ct-cell mono">'+cd.bg.mach.join(',')+'<span class="ct-hsl">L'+bHsl.l+' S'+bHsl.s+' H'+bHsl.h+'</span></div>' +
+          '<div class="ct-cell mono">'+cd.bg.ideal.join(',')+'<span class="ct-hsl">L'+bHslIdeal.l+' S'+bHslIdeal.s+' H'+bHslIdeal.h+'</span></div>' +
+          '<div class="ct-cell ct-diff '+bClass+'">\u0394'+cd.bg.dist.toFixed(1)+' &middot; '+bVerdict+'</div>' +
+          '<div class="ct-rowlabel ct-section">'+t('rowSharpness')+'</div>' +
+          '<div class="ct-cell ct-section mono">'+qd.sharpness.mach+'</div>' +
+          '<div class="ct-cell ct-section mono">'+qd.sharpness.ideal+'</div>' +
+          '<div class="ct-cell ct-section ct-diff '+shClass+'">\u0394'+qd.sharpness.diff+' &middot; '+shVerdict+'</div>' +
+          '<div class="ct-rowlabel">'+t('rowContrast')+'</div>' +
+          '<div class="ct-cell mono">'+qd.contrast.mach+'</div>' +
+          '<div class="ct-cell mono">'+qd.contrast.ideal+'</div>' +
+          '<div class="ct-cell ct-diff '+coClass+'">\u0394'+qd.contrast.diff+' &middot; '+coVerdict+'</div>' +
+          '<div class="ct-rowlabel ct-section">'+t('rowCorrection')+'</div>' +
+          '<div class="ct-cell ct-section mono">'+xd.mach.toFixed(1)+'</div>' +
+          '<div class="ct-cell ct-section mono">'+xd.ideal.toFixed(1)+'</div>' +
+          '<div class="ct-cell ct-section ct-diff '+correctionVerdictClass(xd.over)+'">'+(xd.over>=0?'+':'')+xd.over.toFixed(1)+' &middot; '+correctionVerdictWord(xd.over)+'</div>' +
+        '</div>' +
+        (state.lang === 'gu' ?
+          '<p class="color-note">બેકગ્રાઉન્ડ આ મશીન અને આદર્શ સંદર્ભ વચ્ચે '+bVerdict+' બતાવે છે, તેથી '+
+            (dClass==='ok' ? 'ઉપરનું ડાયમંડ રીડિંગ સાચા રંગની નજીક છે.' : 'ઉપરનો ડાયમંડ તફાવત ('+dVerdict+') લાઇટિંગની ખામીને બદલે ખરેખરી કલર-ચોકસાઈની સમસ્યા જેવો લાગે છે.') +
+          '</p>'
+        :
+          '<p class="color-note">Background reads '+bVerdict+' between this machine and the ideal reference, so the '+
+            (dClass==='ok' ? 'diamond reading above is close to true color.' : 'diamond difference above ('+dVerdict+') looks like a real color-accuracy gap rather than a lighting artifact.') +
+          '</p>');
+    }
+
+    var upgradeHtml = '';
+    if(visibility.upgradeBand){
+      upgradeHtml =
+        '<div class="upgrade-band">' +
+          '<span class="upgrade-label">'+t('upgradeUnlocks')+'</span>' +
+          '<div class="chip-up">5.0</div><div class="chip-up">5.0 EDF</div>' +
+        '</div>';
+    }
+
+    var metaBlockHtml = '';
+    if(visibility.metadata){
+      metaBlockHtml =
+        '<button class="metadata-toggle stone-metadata-toggle" type="button">'+(visibility.metadataOpen ? t('hideMetadata') : t('showMetadata'))+'</button>' +
+        '<div class="metadata-panel"'+(visibility.metadataOpen ? '' : ' hidden')+'>'+metaHtml+'</div>';
+    }
+
+    var row = document.createElement('div');
+    row.className = 'stone-row';
+    row.style.animation = 'cardIn .4s ease backwards';
+    row.style.animationDelay = (i*40)+'ms';
+    row.innerHTML = headHtml + compareHtml + tablesHtml + upgradeHtml + metaBlockHtml;
+    list.appendChild(row);
+    animatedNumber(row.querySelector('.stone-score-num'), 'stone:'+m.id+':'+st.id, sv);
+  });
+}
+
+function openDetail(id){
+  state.activeMachine = id;
+  document.getElementById('summarySection').hidden = true;
+  document.getElementById('fleetView').hidden = true;
+  document.getElementById('detailView').hidden = false;
+  renderDetail();
+  playEnter(document.getElementById('detailView'));
+}
+
+document.getElementById('backBtn').addEventListener('click', function(){
+  document.getElementById('detailView').hidden = true;
+  document.getElementById('summarySection').hidden = false;
+  document.getElementById('fleetView').hidden = false;
+  playEnter(document.getElementById('summarySection'));
+  playEnter(document.getElementById('fleetView'));
+});
+
+document.getElementById('metricControl').addEventListener('click', function(e){
+  var btn = e.target.closest('.metric-pill');
+  if(!btn) return;
+  state.metric = btn.getAttribute('data-metric');
+  document.querySelectorAll('#metricControl .metric-pill').forEach(function(b){ b.classList.toggle('active', b===btn); });
+  renderSummary();
+  if(document.getElementById('detailView').hidden){ renderFleet(); } else { renderDetail(); }
+});
+
+document.getElementById('stoneList').addEventListener('click', function(e){
+  var btn = e.target.closest('.stone-metadata-toggle');
+  if(!btn) return;
+  var panel = btn.nextElementSibling;
+  var open = panel.hidden;
+  panel.hidden = !open;
+  btn.textContent = open ? t('hideMetadata') : t('showMetadata');
+  if(open) playEnter(panel);
+});
+
+document.getElementById('viewControl').addEventListener('click', function(e){
+  var btn = e.target.closest('.view-pill');
+  if(!btn) return;
+  state.compareMode = btn.getAttribute('data-mode');
+  document.querySelectorAll('#viewControl .view-pill').forEach(function(b){ b.classList.toggle('active', b===btn); });
+  renderDetail();
+});
+
+function applyStaticTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('themeToggle').textContent = isDark ? t('lightMode') : t('darkMode');
+  document.getElementById('langToggle').textContent = state.lang === 'gu' ? 'English' : LANG.gu.langName;
+}
+
+document.getElementById('langToggle').addEventListener('click', function(){
+  state.lang = state.lang === 'gu' ? 'en' : 'gu';
+  applyStaticTranslations();
+  updateWeightLabels();
+  renderSummary();
+  if(document.getElementById('detailView').hidden === false){ renderDetail(); } else { renderFleet(); }
+});
+
+function markCurrentStyle(){
+  var current = document.documentElement.getAttribute('data-report-theme');
+  document.querySelectorAll('.picker-option').forEach(function(opt){
+    var isCurrent = opt.getAttribute('data-theme-option') === current;
+    opt.classList.toggle('current', isCurrent);
+  });
+}
+
+function markCurrentAudience(){
+  document.querySelectorAll('.audience-btn').forEach(function(btn){
+    btn.classList.toggle('current', btn.getAttribute('data-audience') === state.audience);
+  });
+}
+
+document.getElementById('audienceOptions').addEventListener('click', function(e){
+  var btn = e.target.closest('.audience-btn');
+  if(!btn) return;
+  applyAudiencePreset(btn.getAttribute('data-audience'));
+  document.querySelectorAll('.audience-btn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+  markCurrentAudience();
+});
+
+function showSaveStatus(ok){
+  var el = document.getElementById('saveStatus');
+  el.textContent = ok ? t('saveOk') : t('saveFail');
+  el.className = 'save-status show ' + (ok ? 'ok' : 'fail');
+  clearTimeout(showSaveStatus._t);
+  showSaveStatus._t = setTimeout(function(){ el.classList.remove('show'); }, 4000);
+}
+
+document.getElementById('saveSettingsBtn').addEventListener('click', function(){
+  readVisibilityFromCheckboxes();
+  applyVisibilityToPage();
+  var ok = saveSettings();
+  showSaveStatus(ok);
+  if(document.getElementById('detailView').hidden === false){ renderDetail(); }
+  renderFleet();
+});
+
+document.querySelectorAll('.picker-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.documentElement.setAttribute('data-report-theme', btn.getAttribute('data-theme'));
+    readVisibilityFromCheckboxes();
+    applyVisibilityToPage();
+    saveSettings();
+    document.getElementById('stylePicker').hidden = true;
+    document.getElementById('summarySection').hidden = false;
+    document.getElementById('fleetView').hidden = false;
+    markCurrentStyle();
+    markCurrentAudience();
+    if(document.getElementById('detailView').hidden === false){ renderDetail(); }
+    renderFleet();
+    playEnter(document.getElementById('summarySection'));
+    playEnter(document.getElementById('fleetView'));
+  });
+});
+
+document.getElementById('changeStyleBtn').addEventListener('click', function(){
+  document.getElementById('detailView').hidden = true;
+  document.getElementById('summarySection').hidden = true;
+  document.getElementById('fleetView').hidden = true;
+  document.getElementById('stylePicker').hidden = false;
+  document.getElementById('visStoneTables').checked = visibility.stoneTables;
+  document.getElementById('visMetadata').checked = visibility.metadata;
+  document.getElementById('visMetadataOpen').checked = visibility.metadataOpen;
+  document.getElementById('visUpgradeBand').checked = visibility.upgradeBand;
+  document.getElementById('visBackendSettings').checked = visibility.backendSettings;
+  markCurrentStyle();
+  markCurrentAudience();
+});
+
+document.getElementById('themeToggle').addEventListener('click', function(){
+  var html = document.documentElement;
+  var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  this.textContent = next === 'dark' ? t('lightMode') : t('darkMode');
+});
+
+document.getElementById('settingsToggle').addEventListener('click', function(){
+  var panel = document.getElementById('settingsPanel');
+  var open = panel.classList.toggle('open');
+  this.setAttribute('aria-expanded', String(open));
+});
+
+function updateWeightLabels(){
+  document.getElementById('wColorOut').textContent = weights.color+'%';
+  document.getElementById('wPictureOut').textContent = weights.picture+'%';
+  document.getElementById('wConsistOut').textContent = weights.consistency+'%';
+  document.getElementById('wCorrectionOut').textContent = weights.correction+'%';
+  document.getElementById('wSpeedOut').textContent = weights.speed+'%';
+  var total = weights.color + weights.picture + weights.consistency + weights.correction + weights.speed || 1;
+  document.getElementById('weightNormHint').textContent = t('normalizedPrefix') + ' ' +
+    Math.round(weights.color/total*100) + '% / ' +
+    Math.round(weights.picture/total*100) + '% / ' +
+    Math.round(weights.consistency/total*100) + '% / ' +
+    Math.round(weights.correction/total*100) + '% / ' +
+    Math.round(weights.speed/total*100) + '% ' + t('normalizedSuffix').replace('{t}', total);
+}
+
+function applySettingsChange(){
+  recomputeComposite();
+  updateWeightLabels();
+  renderSummary();
+  if(document.getElementById('detailView').hidden){ renderFleet(); } else { renderDetail(); }
+}
+
+document.getElementById('wColor').addEventListener('input', function(){ weights.color = +this.value; applySettingsChange(); });
+document.getElementById('wPicture').addEventListener('input', function(){ weights.picture = +this.value; applySettingsChange(); });
+document.getElementById('wConsist').addEventListener('input', function(){ weights.consistency = +this.value; applySettingsChange(); });
+document.getElementById('wCorrection').addEventListener('input', function(){ weights.correction = +this.value; applySettingsChange(); });
+document.getElementById('wSpeed').addEventListener('input', function(){ weights.speed = +this.value; applySettingsChange(); });
+
+document.getElementById('tHealthy').addEventListener('change', function(){
+  var v = Math.max(1, Math.min(100, (+this.value || 80)));
+  thresholds.healthy = Math.max(thresholds.danger+1, v);
+  this.value = thresholds.healthy;
+  applySettingsChange();
+});
+document.getElementById('tDanger').addEventListener('change', function(){
+  var v = Math.max(0, Math.min(99, (+this.value || 60)));
+  thresholds.danger = Math.min(thresholds.healthy-1, v);
+  this.value = thresholds.danger;
+  applySettingsChange();
+});
+document.getElementById('resetSettings').addEventListener('click', function(){
+  weights = { color:30, picture:20, consistency:20, speed:12, correction:18 };
+  thresholds = { healthy:80, danger:60 };
+  document.getElementById('wColor').value = 30;
+  document.getElementById('wPicture').value = 20;
+  document.getElementById('wConsist').value = 20;
+  document.getElementById('wCorrection').value = 18;
+  document.getElementById('wSpeed').value = 12;
+  document.getElementById('tHealthy').value = 80;
+  document.getElementById('tDanger').value = 60;
+  applySettingsChange();
+});
+
+function applyLoadedSettings(saved){
+  if(saved.theme) document.documentElement.setAttribute('data-report-theme', saved.theme);
+  if(saved.lang){ state.lang = saved.lang; }
+  if(saved.audience){
+    state.audience = saved.audience;
+    document.querySelectorAll('.audience-btn').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-audience') === saved.audience);
+    });
+  }
+  if(saved.visibility){
+    visibility = saved.visibility;
+    document.getElementById('visStoneTables').checked = visibility.stoneTables;
+    document.getElementById('visMetadata').checked = visibility.metadata;
+    document.getElementById('visMetadataOpen').checked = visibility.metadataOpen;
+    document.getElementById('visUpgradeBand').checked = visibility.upgradeBand;
+    document.getElementById('visBackendSettings').checked = visibility.backendSettings;
+  }
+  applyVisibilityToPage();
+  applyStaticTranslations();
+  updateWeightLabels();
+}
+
+/* =========================
+   REAL CAPTURE DATA OVERRIDES
+   ========================= */
+var reportData = window.V360_REPORT_DATA || {
+  schemaVersion:'1.0', mode:'empty', customer:{}, generatedAt:null,
+  machines:[], stones:[
+    {id:'D-1',shape:'Master stone'},{id:'D-2',shape:'Master stone'},{id:'D-3',shape:'Master stone'},
+    {id:'D-4',shape:'Princess'},{id:'D-5',shape:'Master stone'},{id:'D-6',shape:'Master stone'}
+  ], warnings:[], excludedMachines:[], sourceSummary:{}, calibration:{}
+};
+machines = Array.isArray(reportData.machines) ? reportData.machines : [];
+stones = Array.isArray(reportData.stones) && reportData.stones.length ? reportData.stones : stones;
+
+function isScore(v){ return typeof v === 'number' && isFinite(v); }
+function clampScore(v){ return Math.max(0, Math.min(100, Math.round(v))); }
+function finiteValues(arr){ return arr.filter(function(v){ return typeof v === 'number' && isFinite(v); }); }
+function averageValues(arr){ var v=finiteValues(arr); return v.length ? v.reduce(function(a,b){return a+b;},0)/v.length : null; }
+function safeText(v){ return v === null || typeof v === 'undefined' || v === '' ? '—' : String(v); }
+function esc(v){
+  return safeText(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function scoreText(v){ return isScore(v) ? String(Math.round(v)) : 'N/A'; }
+function fmtOne(v){ return typeof v === 'number' && isFinite(v) ? v.toFixed(1) : '—'; }
+function fmtSeconds(v){
+  if(typeof v !== 'number' || !isFinite(v)) return '—';
+  var total=Math.max(0,Math.round(v)), h=Math.floor(total/3600), m=Math.floor((total%3600)/60), s=total%60;
+  return (h ? h+':' + String(m).padStart(2,'0') : m) + ':' + String(s).padStart(2,'0');
+}
+function fmtRgb(v){ return Array.isArray(v) && v.length>=3 ? v.slice(0,3).map(function(x){return Math.round(x);}).join(',') : '—'; }
+function getStoneData(m, i){
+  if(!m || !Array.isArray(m.stonesData)) return null;
+  return m.stonesData[i] || m.stonesData.filter(function(s){ return s && s.id === stones[i].id; })[0] || null;
+}
+function metricValue(m,key){ return m && m.scores ? m.scores[key] : null; }
+function weightedCompositeFor(values){
+  var total=0, sum=0;
+  ['color','picture','consistency','speed','correction'].forEach(function(k){
+    var v=values[k], w=weights[k] || 0;
+    if(isScore(v) && w>0){ sum += v*w; total += w; }
+  });
+  return total ? clampScore(sum/total) : null;
+}
+
+recomputeComposite = function(){
+  machines.forEach(function(m){ m.scores.composite = weightedCompositeFor(m.scores || {}); });
+};
+
+animatedNumber = function(el,key,to){
+  if(!isScore(to)){
+    el.textContent='N/A';
+    el.classList.add('metric-na');
+    lastValues[key]=to;
+    return;
+  }
+  el.classList.remove('metric-na');
+  var from=isScore(lastValues[key]) ? lastValues[key] : to;
+  lastValues[key]=to;
+  if(from===to){ el.textContent=Math.round(to); return; }
+  var start=null,duration=450;
+  function step(ts){
+    if(!start) start=ts;
+    var p=Math.min((ts-start)/duration,1), eased=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(to-from)*eased);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+};
+
+statusFor = function(v){ return !isScore(v) ? 'unknown' : (v>=thresholds.healthy?'success':(v>=thresholds.danger?'warning':'danger')); };
+statusLabel = function(s){ return s==='success'?t('statusHealthy'):(s==='warning'?t('statusWarning'):(s==='danger'?t('statusDanger'):t('statusUnknown'))); };
+fmtDelta = function(d){ if(!isScore(d)) return '—'; d=Math.round(d); return (d>0?'+':'')+d; };
+deltaClass = function(d){ return !isScore(d)?'delta-neutral':(d>=0?'delta-ok':(d>=-15?'delta-warn':'delta-bad')); };
+
+verdictClass = function(d){
+  if(!isScore(d)) return 'unknown';
+  var c=(reportData.calibration && reportData.calibration.color) || {};
+  var ok=isScore(c.okDistance)?c.okDistance:3, warn=isScore(c.warnDistance)?c.warnDistance:8;
+  return d<ok?'ok':(d<warn?'warn':'bad');
+};
+verdictWord = function(d){ var c=verdictClass(d); return c==='ok'?t('vOk'):(c==='warn'?t('vWarn'):(c==='bad'?t('vBad'):t('vUnknown'))); };
+qualityVerdictClass = function(d){ return !isScore(d)?'unknown':(d===0?'ok':(d===1?'warn':'bad')); };
+qualityVerdictWord = function(d){ var c=qualityVerdictClass(d); return c==='ok'?t('qOk'):(c==='warn'?t('qWarn'):(c==='bad'?t('qBad'):t('vUnknown'))); };
+correctionVerdictClass = function(d){
+  if(!isScore(d)) return 'unknown';
+  var c=(reportData.calibration && reportData.calibration.correction) || {};
+  var ok=isScore(c.okExcess)?c.okExcess:8, warn=isScore(c.warnExcess)?c.warnExcess:25;
+  return d<ok?'ok':(d<warn?'warn':'bad');
+};
+correctionVerdictWord = function(d){ var c=correctionVerdictClass(d); return c==='ok'?t('cOk'):(c==='warn'?t('cWarn'):(c==='bad'?t('cBad'):t('vUnknown'))); };
+
+stoneColorData = function(m,stoneIndex){
+  var sd=getStoneData(m,stoneIndex);
+  return sd && sd.color ? sd.color : {diamond:{mach:null,ideal:null,dist:null},bg:{mach:null,ideal:null,dist:null}};
+};
+stoneQualityData = function(m,stoneIndex){
+  var sd=getStoneData(m,stoneIndex);
+  return sd && sd.quality ? sd.quality : {sharpness:{mach:null,ideal:null,diff:null},contrast:{mach:null,ideal:null,diff:null}};
+};
+stoneCorrectionData = function(m,stoneIndex){
+  var sd=getStoneData(m,stoneIndex);
+  return sd && sd.correction ? sd.correction : {mach:null,ideal:null,over:null};
+};
+
+function buildCustomerLine(){
+  var c=reportData.customer || {}, parts=[];
+  if(c.name) parts.push(c.name);
+  if(c.preparedBy) parts.push((state.lang==='gu'?'તૈયાર કરનાર ':'prepared by ')+c.preparedBy);
+  if(c.reportDate){
+    var dt=new Date(c.reportDate+'T00:00:00');
+    parts.push(isNaN(dt.getTime())?c.reportDate:dt.toLocaleDateString(state.lang==='gu'?'gu-IN':'en-GB',{day:'numeric',month:'short',year:'numeric'}));
+  }
+  if(c.location) parts.push(c.location);
+  return parts.join(' · ') || (state.lang==='gu'?'V360 મશીન ઓડિટ':'V360 machine audit');
+}
+function reportModeLabel(){
+  var partial=machines.some(function(m){return m.coverage && m.coverage.partial;});
+  if(reportData.mode==='empty') return state.lang==='gu'?'ડેટા લોડ નથી':'no audit data loaded';
+  if(partial) return state.lang==='gu'?'વાસ્તવિક ડેટા · આંશિક':'real data · partial';
+  return state.lang==='gu'?'વાસ્તવિક કેપ્ચર ડેટા':'real capture data';
+}
+function buildFleetHint(){
+  var excluded=(reportData.excludedMachines||[]).length;
+  var base=state.lang==='gu' ? machines.length+' મશીનનું વિશ્લેષણ થયું.' : machines.length+' machine'+(machines.length===1?'':'s')+' analyzed.';
+  if(excluded) base += state.lang==='gu' ? ' '+excluded+' અધૂરા/અમાન્ય મશીન સ્કોરિંગમાંથી બહાર રાખ્યા.' : ' '+excluded+' incomplete or invalid machine'+(excluded===1?' was':'s were')+' excluded from scoring.';
+  return base;
+}
+function buildDisclosure(){
+  var cal=reportData.calibration || {}, version=cal.version || 'provisional';
+  if(state.lang==='gu'){
+    return 'સ્કોર '+version+' નોર્મલાઇઝેશનનો ઉપયોગ કરે છે. આ વાસ્તવિક કેપ્ચર ફીલ્ડ્સ પરથી ગણાય છે, પરંતુ સર્વિસ થ્રેશોલ્ડને જાણીતા સ્વસ્થ અને ખામીવાળા મશીનોના મોટા કેલિબ્રેશન સેટ સામે માન્ય કરવાનું બાકી છે.';
+  }
+  return 'Scores use the '+version+' normalization profile. They are computed from real capture fields, but the service thresholds still require validation against a larger calibration set of known-healthy and known-faulty machines.';
+}
+function applyReportHeader(){
+  var sub=document.getElementById('reportSubtitle'); if(sub) sub.textContent=buildCustomerLine();
+  var tag=document.getElementById('dataTag'); if(tag) tag.textContent=reportModeLabel();
+  var hint=document.getElementById('fleetHint'); if(hint) hint.textContent=buildFleetHint();
+  var disclosure=document.getElementById('reportDisclosure'); if(disclosure) disclosure.textContent=buildDisclosure();
+  var printBtn=document.getElementById('printBtn'); if(printBtn) printBtn.textContent=state.lang==='gu'?'પ્રિન્ટ / PDF':'Print / PDF';
+  var dataBtn=document.getElementById('downloadDataBtn'); if(dataBtn) dataBtn.textContent=state.lang==='gu'?'ઓડિટ JSON':'Audit JSON';
+  document.title=(reportData.customer && reportData.customer.name ? reportData.customer.name+' · ' : '')+'Machine Health Audit · V360';
+}
+
+applyStaticTranslations = function(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.getAttribute('data-i18n')); });
+  var isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.getElementById('themeToggle').textContent=isDark?t('lightMode'):t('darkMode');
+  document.getElementById('langToggle').textContent=state.lang==='gu'?'English':LANG.gu.langName;
+  applyReportHeader();
+};
+
+applyVisibilityToPage = function(){
+  var hasUpgrades=!!(reportData.sourceSummary && (reportData.sourceSummary.hasV50 || reportData.sourceSummary.hasV50Edf));
+  if(!hasUpgrades) visibility.upgradeBand=false;
+  document.getElementById('settingsToggle').hidden=!visibility.backendSettings;
+  document.documentElement.setAttribute('data-audience',state.audience);
+  document.documentElement.setAttribute('data-upgrade-band',visibility.upgradeBand?'shown':'hidden');
+  var up=document.getElementById('visUpgradeBand');
+  if(up){ up.checked=visibility.upgradeBand; up.disabled=!hasUpgrades; }
+};
+
+renderSummary = function(){
+  var key=state.metric;
+  var vals=finiteValues(machines.map(function(m){return metricValue(m,key);}));
+  var avg=vals.length?Math.round(averageValues(vals)):null;
+  var counts={success:0,warning:0,danger:0,unknown:0};
+  machines.forEach(function(m){counts[statusFor(metricValue(m,key))]++;});
+  animatedNumber(document.getElementById('summaryAvg'),'summary:'+key,avg);
+  var avgDelta=document.getElementById('summaryDelta');
+  avgDelta.textContent=isScore(avg)?fmtDelta(avg-100)+' '+t('vsIdealSuffix'):'—';
+  avgDelta.className='delta mono '+deltaClass(isScore(avg)?avg-100:null);
+  document.getElementById('summaryMetricLabel').textContent=metricLabel(key)+' '+t('acrossAllSuffix').replace('{n}',machines.length);
+  document.getElementById('summaryDist').innerHTML=
+    '<span class="dist-item"><span class="dist-dot" style="background:var(--success)"></span>'+counts.success+' '+esc(t('statusHealthy'))+'</span>'+
+    '<span class="dist-item"><span class="dist-dot" style="background:var(--warning)"></span>'+counts.warning+' '+esc(t('statusWarning'))+'</span>'+
+    '<span class="dist-item"><span class="dist-dot" style="background:var(--danger)"></span>'+counts.danger+' '+esc(t('statusDanger'))+'</span>'+
+    (counts.unknown?'<span class="dist-item"><span class="dist-dot" style="background:var(--unknown)"></span>'+counts.unknown+' '+esc(t('statusUnknown'))+'</span>':'');
+
+  var sorted=machines.slice().sort(function(a,b){
+    var av=metricValue(a,key),bv=metricValue(b,key);
+    if(!isScore(av)&&!isScore(bv)) return a.id.localeCompare(b.id);
+    if(!isScore(av)) return 1; if(!isScore(bv)) return -1; return bv-av;
+  });
+  var rankList=document.getElementById('rankList'); rankList.innerHTML='';
+  sorted.forEach(function(m){
+    var v=metricValue(m,key),s=statusFor(v),vsFleet=isScore(v)&&isScore(avg)?v-avg:null;
+    var row=document.createElement('div'); row.className='rank-row';
+    row.innerHTML='<span class="rank-id mono">'+esc(m.id)+'</span>'+
+      '<div class="rank-track"><div class="rank-fill" style="width:'+(isScore(v)?v:0)+'%;background:var(--'+s+')"></div>'+
+      (isScore(avg)?'<div class="rank-avg-line" style="left:'+avg+'%" title="'+esc(t('fleetAvgTooltip'))+'"></div>':'')+'</div>'+
+      '<span class="rank-score mono">'+scoreText(v)+'</span>'+
+      '<span class="delta mono '+deltaClass(vsFleet)+'" title="'+esc(t('vsFleetTooltip'))+'">'+fmtDelta(vsFleet)+'</span>';
+    row.onclick=function(){openDetail(m.id);}; rankList.appendChild(row);
+  });
+
+  var finiteSorted=sorted.filter(function(m){return isScore(metricValue(m,key));});
+  var conclusion='';
+  if(!finiteSorted.length){
+    conclusion=state.lang==='gu'?'આ માપ માટે પૂરતો માન્ય ડેટા મળ્યો નથી. સોર્સ 0.json ફાઇલ અને જરૂરી ફીલ્ડ તપાસો.':'There is not enough valid data to score this measure. Check the source 0.json files and required fields.';
+  } else {
+    var best=finiteSorted[0],worst=finiteSorted[finiteSorted.length-1],laggards=counts.warning+counts.danger;
+    if(state.lang==='gu'){
+      conclusion='ફ્લીટ સરેરાશ '+metricLabel(key)+' પર '+avg+'/100 છે. '+counts.success+' સ્વસ્થ, '+counts.warning+' ને ધ્યાન જરૂરી અને '+counts.danger+' મશીન સર્વિસ શ્રેણીમાં છે. '+worst.id+' આ માપ પર આદર્શથી સૌથી દૂર છે.';
+      if((reportData.excludedMachines||[]).length) conclusion+=' અધૂરા ડેટાવાળા '+reportData.excludedMachines.length+' મશીન આ સરેરાશમાં સામેલ નથી.';
+    } else {
+      conclusion='Fleet average is '+avg+'/100 for '+metricLabel(key)+'. '+counts.success+' are healthy, '+counts.warning+' need attention, and '+counts.danger+' fall in the service band. '+worst.id+' is furthest from the ideal reference on this measure.';
+      if((reportData.excludedMachines||[]).length) conclusion+=' '+reportData.excludedMachines.length+' machine'+(reportData.excludedMachines.length===1?' with incomplete data is':'s with incomplete data are')+' excluded from this average.';
+      if(laggards && best) conclusion+=' '+best.id+' is the strongest internal benchmark for the corrective pass.';
+    }
+  }
+  document.getElementById('conclusionText').textContent=conclusion;
+};
+
+renderFleet = function(){
+  var grid=document.getElementById('fleetGrid'); grid.innerHTML='';
+  if(!machines.length){ grid.innerHTML='<div class="empty-report">'+esc(state.lang==='gu'?'આ રિપોર્ટમાં કોઈ સ્કોર કરેલું મશીન નથી.':'No scored machines are present in this report.')+'</div>'; return; }
+  machines.forEach(function(m,i){
+    var v=metricValue(m,state.metric),s=statusFor(v),card=document.createElement('div');
+    card.className='m-card'; card.style.setProperty('--status','var(--'+s+')'); card.style.animationDelay=(i*45)+'ms';
+    var dots=stones.map(function(st,si){
+      var sd=getStoneData(m,si),sv=sd&&sd.available?sd.score:null,ss=statusFor(sv);
+      return '<span class="dot" style="background:var(--'+ss+')" title="'+esc(st.id+' · '+scoreText(sv))+'"></span>';
+    }).join('');
+    var cov=m.coverage||{matched:stones.length,expected:stones.length,partial:false};
+    var covHtml='<span class="coverage-chip '+(cov.partial?'partial':'')+'">'+esc(cov.matched+'/'+cov.expected+' stones')+'</span>';
+    card.innerHTML='<div class="facet"></div><p class="ref-code">ref. '+esc(m.id.replace(/\s+/g,'-').toLowerCase())+'</p>'+
+      '<p class="m-id mono">'+esc(m.id)+covHtml+'</p><span class="badge badge-'+s+'">'+esc(statusLabel(s))+'</span>'+
+      '<div class="m-score mono"><span class="m-score-num">0</span><span class="unit">/100</span><span class="delta '+deltaClass(isScore(v)?v-100:null)+'" title="vs ideal">'+fmtDelta(isScore(v)?v-100:null)+'</span></div>'+
+      '<div class="m-score-badge-wrap"><span class="m-score-badge-num mono">0</span></div><p class="m-metric">'+esc(metricLabel(state.metric))+'</p>'+
+      '<div class="mini-stones">'+dots+'</div>';
+    card.onclick=function(){openDetail(m.id);}; grid.appendChild(card);
+    animatedNumber(card.querySelector('.m-score-num'),'machine:'+m.id+':'+state.metric,v);
+    animatedNumber(card.querySelector('.m-score-badge-num'),'machine-badge:'+m.id+':'+state.metric,v);
+  });
+};
+
+buildRecommendedFix = function(m){
+  var fixes=Array.isArray(m.recommendedFixes)?m.recommendedFixes:[];
+  if(!fixes.length){
+    return {clean:true,text:state.lang==='gu'?'કોઈ પુનરાવર્તિત સેટિંગ મિસમેચ મળ્યો નથી — ઉપલબ્ધ સેટિંગ્સ આદર્શ સંદર્ભ સાથે મેળ ખાય છે.':'no repeated configuration mismatch was found; available settings match the ideal reference.'};
+  }
+  var selected=fixes.slice(0,6);
+  if(state.lang==='gu'){
+    return {clean:false,text:'આ સુધારો: '+selected.map(function(f){return f.field+' ('+safeText(f.actual)+' → '+safeText(f.ideal)+', '+f.count+'/'+f.total+' સ્ટોન)';}).join(' અને ')+'.'};
+  }
+  return {clean:false,text:'adjust '+selected.map(function(f){return f.field+' ('+safeText(f.actual)+' → '+safeText(f.ideal)+', seen on '+f.count+'/'+f.total+' stones)';}).join('; ')+'.'};
+};
+
+buildMachineDiagnosis = function(m){
+  var subs=[
+    {key:'color',label:t('mlColor'),v:m.scores.color},{key:'picture',label:t('mlPicture'),v:m.scores.picture},
+    {key:'consistency',label:t('mlConsistency'),v:m.scores.consistency},{key:'correction',label:t('mlCorrection'),v:m.scores.correction},
+    {key:'speed',label:t('mlSpeed'),v:m.scores.speed}
+  ].filter(function(x){return isScore(x.v);}).sort(function(a,b){return a.v-b.v;});
+  var cov=m.coverage||{matched:stones.length,expected:stones.length,partial:false};
+  if(!subs.length) return state.lang==='gu'?'સ્કોર કરવા માટે પૂરતા માન્ય ફીલ્ડ મળ્યા નથી.':'Not enough valid capture fields were available to build a diagnosis.';
+  var weakest=subs[0],strongest=subs[subs.length-1],diamond=[],bg=[];
+  stones.forEach(function(st,i){var cd=stoneColorData(m,i); if(isScore(cd.diamond.dist)) diamond.push({id:st.id,dist:cd.diamond.dist}); if(isScore(cd.bg.dist)) bg.push({id:st.id,dist:cd.bg.dist});});
+  var avgD=averageValues(diamond.map(function(x){return x.dist;})),avgB=averageValues(bg.map(function(x){return x.dist;}));
+  var worstD=diamond.slice().sort(function(a,b){return b.dist-a.dist;})[0]||null;
+  var envIssue=isScore(avgD)&&isScore(avgB)&&avgB>avgD&&avgB>=5;
+  var status=statusFor(m.scores.composite),gap=strongest.v-weakest.v,below=isScore(m.scores.composite)?Math.max(0,Math.round(thresholds.healthy-m.scores.composite)):null;
+  var coverageNote=cov.partial?(state.lang==='gu'?' નોંધ: આ નિદાન '+cov.matched+'/'+cov.expected+' ઉપલબ્ધ સ્ટોન પર આધારિત છે.':' Note: this diagnosis is based on '+cov.matched+'/'+cov.expected+' available stones.') : '';
+  if(state.lang==='gu'){
+    var g=m.id+' કુલ '+scoreText(m.scores.composite)+'/100 સ્કોર કરે છે. સૌથી નબળું ક્ષેત્ર '+weakest.label+' ('+Math.round(weakest.v)+') છે, જે સૌથી મજબૂત ક્ષેત્ર '+strongest.label+' કરતાં '+Math.round(gap)+' પોઈન્ટ પાછળ છે. ';
+    if(status!=='success'&&isScore(below)) g+=below+' પોઈન્ટ સ્વસ્થ રેખાથી નીચે છે. ';
+    if(envIssue) g+='બેકગ્રાઉન્ડ ડ્રિફ્ટ (સરેરાશ Δ'+fmtOne(avgB)+') ડાયમંડ ડ્રિફ્ટ (Δ'+fmtOne(avgD)+') કરતાં વધારે છે, તેથી લાઇટિંગ/બેકડ્રોપ તપાસ પ્રથમ કરો.';
+    else if(worstD) g+=worstD.id+' માં સૌથી મોટો ડાયમંડ તફાવત (Δ'+fmtOne(worstD.dist)+') છે અને બેકગ્રાઉન્ડ તુલનાત્મક રીતે સ્થિર છે, તેથી ડાયમંડ-સાઇડ કેલિબ્રેશન તપાસો.';
+    return g+coverageNote;
+  }
+  var text=m.id+' scores '+scoreText(m.scores.composite)+'/100 overall. Its weakest area is '+weakest.label+' at '+Math.round(weakest.v)+'/100, '+Math.round(gap)+' points behind '+strongest.label+'. ';
+  if(status!=='success'&&isScore(below)) text+=below+' points separate it from the healthy line. ';
+  if(envIssue) text+='Background drift (average Δ'+fmtOne(avgB)+') exceeds diamond drift (Δ'+fmtOne(avgD)+'), so inspect lighting and backdrop stability first.';
+  else if(worstD) text+=worstD.id+' has the widest diamond gap (Δ'+fmtOne(worstD.dist)+') while the background is comparatively steady, pointing to diamond-side calibration.';
+  return text+coverageNote;
+};
+
+buildMetadataTable = function(m,stoneIndex){
+  var sd=getStoneData(m,stoneIndex);
+  return sd && sd.metadata && Array.isArray(sd.metadata.sections) ? sd.metadata.sections : [];
+};
+buildMetadataHtml = function(m,stoneIndex){
+  var sections=buildMetadataTable(m,stoneIndex),html='';
+  if(!sections.length) return '<div class="stone-unavailable">'+esc(state.lang==='gu'?'આ સ્ટોન માટે મેટાડેટા ઉપલબ્ધ નથી.':'No technical metadata is available for this stone.')+'</div>';
+  sections.forEach(function(sec){
+    html+='<p class="meta-section-title">'+esc(metaSectionLabel(sec.name))+'</p><div class="meta-table">'+
+      '<div class="meta-head"></div><div class="meta-head">'+esc(t('thisMachine'))+'</div><div class="meta-head">'+esc(t('idealReference'))+'</div>';
+    (sec.rows||[]).forEach(function(r){var mm=r.mismatch?' meta-mismatch':''; html+='<div class="meta-field'+mm+'">'+esc(r.field)+'</div><div class="meta-val mono'+mm+'">'+esc(r.mach)+'</div><div class="meta-val mono">'+esc(r.ideal)+'</div>';});
+    html+='</div>';
+  });
+  return html;
+};
+
+function mediaCard(asset,label,isVideo,notice){
+  var media='';
+  if(asset && asset.dataUrl){
+    media=isVideo?'<video controls preload="metadata" src="'+esc(asset.dataUrl)+'"></video>':'<img src="'+esc(asset.dataUrl)+'" alt="'+esc(label)+'">';
+  } else {
+    media='<div class="media-missing">'+esc(notice || (state.lang==='gu'?'મીડિયા ઉપલબ્ધ નથી':'Media not available'))+'</div>';
+  }
+  return '<figure class="media-card">'+media+'<figcaption class="media-caption"><span>'+esc(label)+'</span><span class="media-filename" title="'+esc(asset&&asset.path?asset.path:'')+'">'+esc(asset&&asset.name?asset.name:'')+'</span></figcaption></figure>';
+}
+function getReferenceEntry(tier,stoneId){
+  var refs=reportData && reportData.references ? reportData.references : {};
+  var group=refs && refs[tier] ? refs[tier] : {};
+  return group && stoneId ? (group[stoneId] || null) : null;
+}
+function buildCompareHtml(sd){
+  var a=sd&&sd.assets?sd.assets:{}, ideal=getReferenceEntry('ideal',sd&&sd.id), ia=ideal&&ideal.assets?ideal.assets:{};
+  var full=state.compareMode==='full',mv=full&&a.machineVideo&&a.machineVideo.dataUrl,iv=full&&ia.video&&ia.video.dataUrl;
+  var machineAsset=mv?a.machineVideo:a.machineStill, idealAsset=iv?ia.video:ia.still;
+  var machineNotice=full&&!mv?(state.lang==='gu'?'વિડિયો એમ્બેડ નથી; થંબનેલ બતાવ્યું છે.':'Video was not embedded; showing the still image.') : null;
+  var idealNotice=full&&!iv?(state.lang==='gu'?'સંદર્ભ વિડિયો એમ્બેડ નથી; થંબનેલ બતાવ્યું છે.':'Reference video was not embedded; showing the still image.') : null;
+  return '<div class="compare real-media '+(full?'full':'')+'">'+mediaCard(machineAsset,t('thisMachine'),!!mv,machineNotice)+mediaCard(idealAsset,t('idealReference'),!!iv,idealNotice)+'</div>';
+}
+function buildUpgradeHtml(sd){
+  if(!visibility.upgradeBand || !sd) return '';
+  var cards=[];
+  [['v50','5.0'],['v50edf','5.0 EDF']].forEach(function(pair){
+    var u=getReferenceEntry(pair[0],sd.id);
+    if(!u) return;
+    var img=u.assets&&u.assets.still&&u.assets.still.dataUrl?'<img src="'+esc(u.assets.still.dataUrl)+'" alt="'+pair[1]+'">':'<div class="media-missing" style="min-height:58px">—</div>';
+    var meta=[]; if(u.totalSeconds!=null) meta.push(fmtSeconds(u.totalSeconds)); if(u.sharpness!=null) meta.push('sharpness '+u.sharpness);
+    cards.push('<div class="upgrade-preview">'+img+'<div><div class="upgrade-name">'+pair[1]+'</div><div class="upgrade-meta">'+esc(meta.join(' · ') || (state.lang==='gu'?'સંદર્ભ કેપ્ચર':'reference capture'))+'</div></div></div>');
+  });
+  return cards.length?'<div class="upgrade-band real-upgrades"><span class="upgrade-label">'+esc(t('upgradeUnlocks'))+'</span>'+cards.join('')+'</div>':'';
+}
+
+renderDetail = function(){
+  var m=machines.filter(function(x){return x.id===state.activeMachine;})[0]; if(!m) return;
+  document.getElementById('detailTitle').textContent=m.id;
+  var v=metricValue(m,state.metric),s=statusFor(v),badge=document.getElementById('detailBadge');
+  badge.className='badge badge-'+s; badge.textContent=statusLabel(s)+' · '+scoreText(v)+'/100 '+metricLabel(state.metric);
+  var dEl=document.getElementById('detailDelta'); dEl.textContent=isScore(v)?fmtDelta(v-100)+' '+t('vsIdealSuffix'):'—'; dEl.className='delta mono '+deltaClass(isScore(v)?v-100:null);
+  document.getElementById('diagnosisText').textContent=buildMachineDiagnosis(m);
+  var fixEl=document.getElementById('diagnosisFix'),fix=buildRecommendedFix(m);
+  fixEl.innerHTML='<span class="fix-label">'+esc(t('recommendedLabel'))+'</span> '+esc(fix.text); fixEl.className='diagnosis-fix '+(fix.clean?'fix-clean':'fix-action');
+  var list=document.getElementById('stoneList'); list.innerHTML='';
+  stones.forEach(function(st,i){
+    var sd=getStoneData(m,i),available=sd&&sd.available,sv=available?sd.score:null,ss=statusFor(sv);
+    var head='<div class="stone-row-head"><div class="stone-id"><span class="mono">'+esc(st.id)+'</span><span class="shape">'+esc(st.shape||'')+'</span></div><div class="stone-score mono" style="color:var(--'+ss+')"><span class="stone-score-num">0</span><span class="delta '+deltaClass(isScore(sv)?sv-100:null)+'" title="vs ideal">'+fmtDelta(isScore(sv)?sv-100:null)+'</span></div></div>';
+    var content='';
+    if(!available){
+      content='<div class="stone-unavailable">'+esc(state.lang==='gu'?'આ મશીન અથવા આદર્શ સંદર્ભ માટે મેળ ખાતું માન્ય 0.json મળ્યું નથી.':'No matching valid 0.json was found for this machine and the ideal reference.')+'</div>';
+    } else {
+      var cd=stoneColorData(m,i),qd=stoneQualityData(m,i),xd=stoneCorrectionData(m,i);
+      var dHsl=Array.isArray(cd.diamond.mach)?rgbToHsl(cd.diamond.mach[0],cd.diamond.mach[1],cd.diamond.mach[2]):null;
+      var diHsl=Array.isArray(cd.diamond.ideal)?rgbToHsl(cd.diamond.ideal[0],cd.diamond.ideal[1],cd.diamond.ideal[2]):null;
+      var bHsl=Array.isArray(cd.bg.mach)?rgbToHsl(cd.bg.mach[0],cd.bg.mach[1],cd.bg.mach[2]):null;
+      var biHsl=Array.isArray(cd.bg.ideal)?rgbToHsl(cd.bg.ideal[0],cd.bg.ideal[1],cd.bg.ideal[2]):null;
+      var dClass=verdictClass(cd.diamond.dist),bClass=verdictClass(cd.bg.dist),shClass=qualityVerdictClass(qd.sharpness.diff),coClass=qualityVerdictClass(qd.contrast.diff);
+      content+=buildCompareHtml(sd);
+      if(visibility.stoneTables){
+        function hslLine(h){return h?'<span class="ct-hsl">L'+h.l+' S'+h.s+' H'+h.h+'</span>':'';}
+        content+='<div class="color-table"><div class="ct-head"></div><div class="ct-head">'+esc(t('thisMachine'))+'</div><div class="ct-head">'+esc(t('idealReference'))+'</div><div class="ct-head">'+esc(t('colDifference'))+'</div>'+
+          '<div class="ct-rowlabel">'+esc(t('rowDiamond'))+'</div><div class="ct-cell mono">'+fmtRgb(cd.diamond.mach)+hslLine(dHsl)+'</div><div class="ct-cell mono">'+fmtRgb(cd.diamond.ideal)+hslLine(diHsl)+'</div><div class="ct-cell ct-diff '+dClass+'">Δ'+fmtOne(cd.diamond.dist)+' · '+esc(verdictWord(cd.diamond.dist))+'</div>'+
+          '<div class="ct-rowlabel">'+esc(t('rowBackground'))+'</div><div class="ct-cell mono">'+fmtRgb(cd.bg.mach)+hslLine(bHsl)+'</div><div class="ct-cell mono">'+fmtRgb(cd.bg.ideal)+hslLine(biHsl)+'</div><div class="ct-cell ct-diff '+bClass+'">Δ'+fmtOne(cd.bg.dist)+' · '+esc(verdictWord(cd.bg.dist))+'</div>'+
+          '<div class="ct-rowlabel ct-section">'+esc(t('rowSharpness'))+'</div><div class="ct-cell ct-section mono">'+esc(qd.sharpness.mach)+'</div><div class="ct-cell ct-section mono">'+esc(qd.sharpness.ideal)+'</div><div class="ct-cell ct-section ct-diff '+shClass+'">Δ'+safeText(qd.sharpness.diff)+' · '+esc(qualityVerdictWord(qd.sharpness.diff))+'</div>'+
+          '<div class="ct-rowlabel">'+esc(t('rowContrast'))+'</div><div class="ct-cell mono">'+esc(qd.contrast.mach)+'</div><div class="ct-cell mono">'+esc(qd.contrast.ideal)+'</div><div class="ct-cell ct-diff '+coClass+'">Δ'+safeText(qd.contrast.diff)+' · '+esc(qualityVerdictWord(qd.contrast.diff))+'</div>'+
+          '<div class="ct-rowlabel ct-section">'+esc(t('rowCorrection'))+'</div><div class="ct-cell ct-section mono">'+fmtOne(xd.mach)+'</div><div class="ct-cell ct-section mono">'+fmtOne(xd.ideal)+'</div><div class="ct-cell ct-section ct-diff '+correctionVerdictClass(xd.over)+'">'+(isScore(xd.over)&&xd.over>=0?'+':'')+fmtOne(xd.over)+' · '+esc(correctionVerdictWord(xd.over))+'</div></div>';
+        var note;
+        if(state.lang==='gu') note=bClass==='bad'?'બેકગ્રાઉન્ડ તફાવત મોટો છે; કલર ચુકાદા પહેલાં લાઇટિંગ અને બેકડ્રોપ સ્થિરતા તપાસો.':'બેકગ્રાઉન્ડ તુલનાત્મક રીતે સ્થિર છે, તેથી ડાયમંડનો તફાવત મશીન કલર કેલિબ્રેશન સાથે વધુ સંબંધિત છે.';
+        else note=bClass==='bad'?'Background drift is substantial; verify lighting and backdrop stability before treating the diamond delta as a pure color-calibration fault.':'Background is comparatively stable, so the diamond delta is more likely to reflect machine color calibration.';
+        content+='<p class="color-note">'+esc(note)+'</p>';
+      }
+      content+=buildUpgradeHtml(sd);
+      if(visibility.metadata) content+='<button class="metadata-toggle stone-metadata-toggle" type="button">'+esc(visibility.metadataOpen?t('hideMetadata'):t('showMetadata'))+'</button><div class="metadata-panel"'+(visibility.metadataOpen?'':' hidden')+'>'+buildMetadataHtml(m,i)+'</div>';
+      if(sd.sourcePath) content+='<p class="capture-source mono">'+esc(sd.sourcePath)+'</p>';
+    }
+    var row=document.createElement('div'); row.className='stone-row'; row.style.animation='cardIn .4s ease backwards'; row.style.animationDelay=(i*40)+'ms'; row.innerHTML=head+content; list.appendChild(row);
+    animatedNumber(row.querySelector('.stone-score-num'),'stone:'+m.id+':'+st.id,sv);
+  });
+};
+
+/* Add translation keys used only by the real-data layer. */
+LANG.en.statusUnknown='insufficient data'; LANG.gu.statusUnknown='અપૂરતો ડેટા';
+LANG.en.vUnknown='not available'; LANG.gu.vUnknown='ઉપલબ્ધ નથી';
+
+/* Real-report actions. */
+var printBtn=document.getElementById('printBtn'); if(printBtn) printBtn.addEventListener('click',function(){window.print();});
+var dataBtn=document.getElementById('downloadDataBtn'); if(dataBtn) dataBtn.addEventListener('click',function(){
+  var clone=JSON.parse(JSON.stringify(reportData));
+  Object.keys(clone.references||{}).forEach(function(tier){
+    Object.keys(clone.references[tier]||{}).forEach(function(stoneId){
+      var assets=clone.references[tier][stoneId]&&clone.references[tier][stoneId].assets;
+      if(assets) Object.keys(assets).forEach(function(k){if(assets[k]) delete assets[k].dataUrl;});
+    });
+  });
+  (clone.machines||[]).forEach(function(m){(m.stonesData||[]).forEach(function(sd){
+    if(sd&&sd.assets){Object.keys(sd.assets).forEach(function(k){if(sd.assets[k]) delete sd.assets[k].dataUrl;});}
+  });});
+  var blob=new Blob([JSON.stringify(clone,null,2)],{type:'application/json'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='V360_Machine_Health_Audit_Data.json'; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+});
+
+
+var savedSettings = loadSettings();
+if(savedSettings) applyLoadedSettings(savedSettings);
+else { applyVisibilityToPage(); applyStaticTranslations(); updateWeightLabels(); }
+
+recomputeComposite();
+renderSummary();
+renderFleet();
+markCurrentStyle();
+document.documentElement.setAttribute('data-audience', state.audience);
+markCurrentAudience();
+</script>
+</body>
+</html>
